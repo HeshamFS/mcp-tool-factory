@@ -8,9 +8,9 @@ Generates comprehensive tests including:
 - Input validation tests
 """
 
-from dataclasses import dataclass, field
-from typing import Any
 import json
+from dataclasses import dataclass
+from typing import Any
 
 
 @dataclass
@@ -169,7 +169,6 @@ class TestToolExistence:
         # Add individual tool tests
         for spec in tool_specs:
             name = spec.get("name", "unknown")
-            desc = spec.get("description", "")[:50]
             code += f'''
     @pytest.mark.asyncio
     async def test_{name}_has_description(self, mcp_client):

@@ -1,7 +1,6 @@
 """Server code generator for MCP Tool Factory."""
 
 import logging
-import re
 from pathlib import Path
 from typing import Any
 
@@ -216,7 +215,7 @@ class ServerGenerator:
             code_parts.append("    value = get_auth(key)")
             code_parts.append("    if not value:")
             code_parts.append(
-                f'        raise ValueError(f"Missing required environment variable: {{key}}")'
+                '        raise ValueError(f"Missing required environment variable: {key}")'
             )
             code_parts.append("    return value")
             code_parts.append("")
@@ -247,9 +246,11 @@ class ServerGenerator:
                 code_parts.append("    # Check auth configuration")
                 code_parts.append("    auth_status = {}")
                 for var in auth_env_vars:
-                    code_parts.append(
-                        f'    auth_status["{var}"] = "configured" if get_auth("{var}") else "MISSING"'
+                    check_line = (
+                        f'    auth_status["{var}"] = '
+                        f'"configured" if get_auth("{var}") else "MISSING"'
                     )
+                    code_parts.append(check_line)
                 code_parts.append('    result["auth_config"] = auth_status')
                 code_parts.append("")
                 code_parts.append("    # Mark unhealthy if any auth is missing")
@@ -623,6 +624,9 @@ dev = [
             for var in auth_env_vars:
                 env_section += f"          {var}: ${{{{ secrets.{var} }}}}\n"
 
+        # Docker image name (used in multiple places)
+        docker_image = server_name.lower().replace(" ", "-")
+
         return f"""name: CI/CD - {server_name}
 
 on:
@@ -688,11 +692,11 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Build Docker image
-        run: docker build -t {server_name.lower().replace(" ", "-")}:latest .
+        run: docker build -t {docker_image}:latest .
 
       - name: Test Docker image
         run: |
-          docker run --rm {server_name.lower().replace(" ", "-")}:latest python -c "import server; print('OK')"
+          docker run --rm {docker_image}:latest python -c "import server; print('OK')"
 
   # Uncomment to push to GitHub Container Registry
   # publish:
@@ -715,5 +719,5 @@ jobs:
   #       with:
   #         context: .
   #         push: true
-  #         tags: ghcr.io/${{{{ github.repository_owner }}}}/{server_name.lower().replace(" ", "-")}:latest
+  #         tags: ghcr.io/${{{{ github.repository_owner }}}}/{docker_image}:latest
 """

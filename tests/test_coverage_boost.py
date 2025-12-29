@@ -1,12 +1,5 @@
 """Additional tests to boost coverage."""
 
-import pytest
-from unittest.mock import Mock, patch, MagicMock
-import os
-import json
-
-from tool_factory.models import ToolSpec
-
 
 class TestConfigEdgeCases:
     """Tests for config edge cases."""

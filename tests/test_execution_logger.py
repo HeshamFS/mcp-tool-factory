@@ -1,15 +1,9 @@
 """Tests for execution_logger module."""
 
-import pytest
-from unittest.mock import Mock, patch
 import json
-import time
 
 from tool_factory.execution_logger import (
     ExecutionLogger,
-    RawLLMCall,
-    RawWebSearch,
-    ExecutionStep,
 )
 
 

@@ -1,17 +1,15 @@
 """Comprehensive tests for execution_logger module."""
 
-import pytest
 import json
 from datetime import datetime
-from unittest.mock import Mock, patch
 
 from tool_factory.execution_logger import (
     ExecutionLogger,
     ExecutionStep,
-    RawLLMCall,
     RawHTTPRequest,
-    RawWebSearch,
+    RawLLMCall,
     RawToolExecution,
+    RawWebSearch,
 )
 
 

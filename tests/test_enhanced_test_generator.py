@@ -1,10 +1,11 @@
 """Tests for enhanced test generator."""
 
 import pytest
+
 from tool_factory.generators.tests import (
+    EnhancedTestGenerator,
     TestCase,
     TestGeneratorConfig,
-    EnhancedTestGenerator,
     generate_enhanced_tests,
 )
 

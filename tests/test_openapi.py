@@ -1,14 +1,15 @@
 """Tests for OpenAPI parser and generator module."""
 
 import pytest
+
 from tool_factory.openapi import (
-    AuthType,
     AuthConfig,
+    AuthType,
     EndpointSpec,
     OpenAPIParser,
     OpenAPIServerGenerator,
-    OpenAPIValidator,
     OpenAPIValidationError,
+    OpenAPIValidator,
 )
 
 

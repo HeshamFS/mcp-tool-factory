@@ -11,7 +11,6 @@ References:
 - https://ai.google.dev/gemini-api/docs/google-search
 """
 
-import json
 import time
 from dataclasses import dataclass, field
 from typing import Any
@@ -72,7 +71,11 @@ class WebSearcher:
             "messages": [
                 {
                     "role": "user",
-                    "content": f"Search the web for: {query}\n\nProvide a comprehensive summary of the most relevant information found.",
+                    "content": (
+                        f"Search the web for: {query}\n\n"
+                        "Provide a comprehensive summary of the most relevant "
+                        "information found."
+                    ),
                 }
             ],
         }
@@ -143,11 +146,16 @@ class WebSearcher:
     def _search_claude_code(self, query: str, max_results: int) -> SearchResult:
         """Search using Claude Code SDK - captures FULL data."""
         import asyncio
-        from claude_agent_sdk import query as sdk_query, ClaudeAgentOptions
+
+        from claude_agent_sdk import ClaudeAgentOptions
+        from claude_agent_sdk import query as sdk_query
 
         api_request = {
             "max_turns": 1,
-            "system_prompt": "You are a research assistant. Search the web and provide factual information with sources.",
+            "system_prompt": (
+                "You are a research assistant. Search the web and provide "
+                "factual information with sources."
+            ),
             "prompt": f"Search the web for information about: {query}",
         }
 
@@ -260,7 +268,10 @@ class WebSearcher:
         api_request = {
             "model_name": self.model or "gemini-2.0-flash",
             "tools": [{"google_search": {}}],
-            "prompt": f"Search the web for: {query}\n\nProvide a comprehensive summary with sources.",
+            "prompt": (
+                f"Search the web for: {query}\n\n"
+                "Provide a comprehensive summary with sources."
+            ),
         }
 
         model = genai.GenerativeModel(
@@ -369,8 +380,7 @@ def _generate_search_queries(description: str) -> list[str]:
     """Generate relevant search queries from a description."""
     queries = []
 
-    # Extract potential API/service names
-    keywords = ["API", "SDK", "library", "endpoint", "service"]
+    # Analyze description to generate relevant queries
     desc_lower = description.lower()
 
     # Look for common patterns

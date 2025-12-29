@@ -4,7 +4,7 @@ Pre-configured OAuth2 providers for common services.
 """
 
 from abc import ABC, abstractmethod
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any
 
 from tool_factory.auth.oauth2 import OAuth2Config

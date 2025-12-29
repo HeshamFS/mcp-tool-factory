@@ -154,7 +154,7 @@ jobs:
           "
 
           # Generate server
-          mcp-factory from-database test.db --name TestServer --output-dir test_output
+          mcp-factory from-database test.db --name TestServer --output test_output
 
           # Verify generated files
           test -f test_output/server.py
@@ -180,7 +180,7 @@ jobs:
           EOF
 
           # Generate server
-          mcp-factory from-openapi petstore.yaml --name TestAPI --output-dir api_output
+          mcp-factory from-openapi petstore.yaml --name TestAPI --output api_output
 
           # Verify generated files
           test -f api_output/server.py

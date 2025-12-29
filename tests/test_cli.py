@@ -1,8 +1,6 @@
 """Tests for CLI module."""
 
 import pytest
-from unittest.mock import Mock, patch
-from pathlib import Path
 from click.testing import CliRunner
 
 from tool_factory.cli import cli

@@ -1,10 +1,10 @@
 """Comprehensive tests for CLI module to increase coverage."""
 
-import pytest
-from click.testing import CliRunner
-from pathlib import Path
 import json
 import os
+
+import pytest
+from click.testing import CliRunner
 
 from tool_factory.cli import cli
 
@@ -238,7 +238,7 @@ class TestGenerateMocked:
 
         with patch("tool_factory.agent.ToolFactoryAgent", return_value=mock_agent):
             with runner.isolated_filesystem():
-                result = runner.invoke(
+                runner.invoke(
                     cli,
                     [
                         "generate",
@@ -265,7 +265,7 @@ class TestGenerateMocked:
 
         with patch("tool_factory.agent.ToolFactoryAgent", return_value=mock_agent):
             with runner.isolated_filesystem():
-                result = runner.invoke(
+                runner.invoke(
                     cli,
                     [
                         "generate",
@@ -291,7 +291,7 @@ class TestGenerateMocked:
 
         with patch("tool_factory.agent.ToolFactoryAgent", return_value=mock_agent):
             with runner.isolated_filesystem():
-                result = runner.invoke(
+                runner.invoke(
                     cli,
                     [
                         "generate",
@@ -322,7 +322,7 @@ class TestGenerateMocked:
 
         with patch("tool_factory.agent.ToolFactoryAgent", return_value=mock_agent):
             with runner.isolated_filesystem():
-                result = runner.invoke(
+                runner.invoke(
                     cli,
                     [
                         "generate",
@@ -353,7 +353,7 @@ class TestGenerateMocked:
 
         with patch("tool_factory.agent.ToolFactoryAgent", return_value=mock_agent):
             with runner.isolated_filesystem():
-                result = runner.invoke(
+                runner.invoke(
                     cli,
                     [
                         "generate",
@@ -379,7 +379,7 @@ class TestGenerateMocked:
 
         with patch("tool_factory.agent.ToolFactoryAgent", return_value=mock_agent):
             with runner.isolated_filesystem():
-                result = runner.invoke(
+                runner.invoke(
                     cli,
                     [
                         "generate",
@@ -405,7 +405,7 @@ class TestGenerateMocked:
 
         with patch("tool_factory.agent.ToolFactoryAgent", return_value=mock_agent):
             with runner.isolated_filesystem():
-                result = runner.invoke(
+                runner.invoke(
                     cli,
                     [
                         "generate",
@@ -455,7 +455,7 @@ class TestGenerateMocked:
 
         with patch("tool_factory.agent.ToolFactoryAgent", return_value=mock_agent):
             with runner.isolated_filesystem():
-                result = runner.invoke(
+                runner.invoke(
                     cli,
                     ["generate", "Test tool", "--no-logging", "--output", "./output"],
                 )
@@ -476,7 +476,7 @@ class TestGenerateMocked:
 
         with patch("tool_factory.agent.ToolFactoryAgent", return_value=mock_agent):
             with runner.isolated_filesystem():
-                result = runner.invoke(
+                runner.invoke(
                     cli,
                     ["generate", "Test tool", "--no-retries", "--output", "./output"],
                 )
@@ -515,7 +515,7 @@ class TestFromOpenAPIMocked:
                     with open("spec.json", "w") as f:
                         json.dump(spec, f)
 
-                    result = runner.invoke(
+                    runner.invoke(
                         cli, ["from-openapi", "spec.json", "--output", "./output"]
                     )
 
@@ -546,7 +546,7 @@ class TestFromOpenAPIMocked:
                             "openapi: '3.0.0'\ninfo:\n  title: Test\n  version: '1.0'"
                         )
 
-                    result = runner.invoke(
+                    runner.invoke(
                         cli,
                         [
                             "from-openapi",
@@ -582,7 +582,7 @@ class TestFromOpenAPIMocked:
                     with open("spec.json", "w") as f:
                         json.dump({"openapi": "3.0.0"}, f)
 
-                    result = runner.invoke(
+                    runner.invoke(
                         cli,
                         [
                             "from-openapi",
@@ -604,8 +604,8 @@ class TestTestCommandMocked:
 
     def test_test_success(self, runner):
         """Test successful test run."""
-        from unittest.mock import Mock, patch
         import subprocess
+        from unittest.mock import Mock, patch
 
         with patch.object(subprocess, "run") as mock_run:
             mock_run.return_value = Mock(returncode=0)
@@ -615,15 +615,15 @@ class TestTestCommandMocked:
                 with open("server/tests/test_example.py", "w") as f:
                     f.write("def test_example(): pass")
 
-                result = runner.invoke(cli, ["test", "server"])
+                runner.invoke(cli, ["test", "server"])
 
                 mock_run.assert_called_once()
                 assert "pytest" in str(mock_run.call_args)
 
     def test_test_failure(self, runner):
         """Test failed test run."""
-        from unittest.mock import Mock, patch
         import subprocess
+        from unittest.mock import Mock, patch
 
         with patch.object(subprocess, "run") as mock_run:
             mock_run.return_value = Mock(returncode=1)
@@ -643,8 +643,8 @@ class TestServeCommandMocked:
 
     def test_serve_stdio(self, runner):
         """Test serve with stdio transport."""
-        from unittest.mock import Mock, patch
         import subprocess
+        from unittest.mock import Mock, patch
 
         with patch.object(subprocess, "run") as mock_run:
             mock_run.return_value = Mock(returncode=0)
@@ -654,14 +654,14 @@ class TestServeCommandMocked:
                 with open("server/server.py", "w") as f:
                     f.write("print('server')")
 
-                result = runner.invoke(cli, ["serve", "server"])
+                runner.invoke(cli, ["serve", "server"])
 
                 mock_run.assert_called_once()
 
     def test_serve_sse(self, runner):
         """Test serve with SSE transport."""
-        from unittest.mock import Mock, patch
         import subprocess
+        from unittest.mock import Mock, patch
 
         with patch.object(subprocess, "run") as mock_run:
             mock_run.return_value = Mock(returncode=0)
@@ -671,7 +671,7 @@ class TestServeCommandMocked:
                 with open("server/server.py", "w") as f:
                     f.write("print('server')")
 
-                result = runner.invoke(
+                runner.invoke(
                     cli, ["serve", "server", "--transport", "sse", "--port", "9000"]
                 )
 
@@ -679,8 +679,8 @@ class TestServeCommandMocked:
 
     def test_serve_keyboard_interrupt(self, runner):
         """Test serve handles keyboard interrupt."""
-        from unittest.mock import Mock, patch
         import subprocess
+        from unittest.mock import patch
 
         with patch.object(subprocess, "run") as mock_run:
             mock_run.side_effect = KeyboardInterrupt()
@@ -711,7 +711,7 @@ class TestOutputPathHandling:
 
         with patch("tool_factory.agent.ToolFactoryAgent", return_value=mock_agent):
             with runner.isolated_filesystem():
-                result = runner.invoke(
+                runner.invoke(
                     cli,
                     [
                         "generate",
@@ -739,7 +739,7 @@ class TestOutputPathHandling:
 
         with patch("tool_factory.agent.ToolFactoryAgent", return_value=mock_agent):
             with runner.isolated_filesystem():
-                result = runner.invoke(
+                runner.invoke(
                     cli,
                     [
                         "generate",

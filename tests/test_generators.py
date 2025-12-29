@@ -1,9 +1,10 @@
 """Tests for code generators."""
 
 import pytest
-from tool_factory.models import ToolSpec
-from tool_factory.generators.server import ServerGenerator
+
 from tool_factory.generators.docs import DocsGenerator
+from tool_factory.generators.server import ServerGenerator
+from tool_factory.models import ToolSpec
 
 
 @pytest.fixture

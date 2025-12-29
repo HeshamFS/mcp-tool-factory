@@ -6,7 +6,6 @@ for production MCP server deployments.
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any
 
 
 class TelemetryExporter(Enum):
@@ -72,7 +71,10 @@ class TelemetryCodeGenerator:
                     "from opentelemetry import trace",
                     "from opentelemetry.sdk.trace import TracerProvider",
                     "from opentelemetry.sdk.trace.export import BatchSpanProcessor",
-                    "from opentelemetry.sdk.resources import Resource, SERVICE_NAME, SERVICE_VERSION",
+                    (
+                        "from opentelemetry.sdk.resources import "
+                        "Resource, SERVICE_NAME, SERVICE_VERSION"
+                    ),
                     "from opentelemetry.trace import Status, StatusCode",
                 ]
             )
@@ -80,7 +82,8 @@ class TelemetryCodeGenerator:
             # Exporter-specific imports
             if self.config.exporter == TelemetryExporter.OTLP:
                 imports.append(
-                    "from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter"
+                    "from opentelemetry.exporter.otlp.proto.grpc.trace_exporter "
+                    "import OTLPSpanExporter"
                 )
             elif self.config.exporter == TelemetryExporter.JAEGER:
                 imports.append(
@@ -110,7 +113,8 @@ class TelemetryCodeGenerator:
 
             if self.config.exporter == TelemetryExporter.OTLP:
                 imports.append(
-                    "from opentelemetry.exporter.otlp.proto.grpc.metric_exporter import OTLPMetricExporter"
+                    "from opentelemetry.exporter.otlp.proto.grpc.metric_exporter "
+                    "import OTLPMetricExporter"
                 )
             elif self.config.exporter == TelemetryExporter.CONSOLE:
                 imports.append(
@@ -199,7 +203,8 @@ setup_telemetry()
     )
 """
         elif self.config.exporter == TelemetryExporter.ZIPKIN:
-            code += f"""    exporter = ZipkinExporter(endpoint="{self.config.endpoint}/api/v2/spans")
+            zipkin_endpoint = f"{self.config.endpoint}/api/v2/spans"
+            code += f"""    exporter = ZipkinExporter(endpoint="{zipkin_endpoint}")
 """
         elif self.config.exporter == TelemetryExporter.AZURE:
             code += f"""    exporter = AzureMonitorTraceExporter(

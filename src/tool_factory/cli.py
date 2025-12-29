@@ -242,12 +242,12 @@ def generate(
 
     console.print(
         Panel(
-            f"[bold green]Successfully generated MCP server![/bold green]\n\n"
-            f"[bold]Tools created:[/bold]\n"
+            "[bold green]Successfully generated MCP server![/bold green]\n\n"
+            "[bold]Tools created:[/bold]\n"
             + "\n".join(
                 f"  - {spec.name}: {spec.description}" for spec in result.tool_specs
             )
-            + f"\n\n[bold]Files generated:[/bold]\n"
+            + "\n\n[bold]Files generated:[/bold]\n"
             + "\n".join(files_list),
             title="Generation Complete",
         )
@@ -260,9 +260,13 @@ def generate(
     console.print("  3. python server.py")
     console.print()
     console.print("[dim]Or add to Claude Code config:[/dim]")
-    console.print(
-        f'  {{"mcpServers": {{"{name.lower()}": {{"command": "python", "args": ["{output_path}/server.py"]}}}}}}'
+    server_name = name.lower()
+    server_path = f"{output_path}/server.py"
+    mcp_config = (
+        f'{{"mcpServers": {{"{server_name}": '
+        f'{{"command": "python", "args": ["{server_path}"]}}}}}}'
     )
+    console.print(f"  {mcp_config}")
 
 
 @cli.command()
@@ -461,12 +465,12 @@ def from_database(
         mcp-factory from-database "postgresql://user:pass@host/db" --type postgresql
     """
     from tool_factory.database import (
-        DatabaseType,
         DatabaseIntrospector,
         DatabaseServerGenerator,
+        DatabaseType,
     )
-    from tool_factory.generators.server import ServerGenerator
     from tool_factory.generators.docs import DocsGenerator
+    from tool_factory.generators.server import ServerGenerator
     from tool_factory.models import GeneratedServer
 
     # Parse database type
@@ -651,15 +655,15 @@ def serve(server_path: str, transport: str, port: int) -> None:
         mcp-factory serve ./generated
         mcp-factory serve ./generated --transport sse --port 8080
     """
-    import subprocess
     import os
+    import subprocess
 
     env = os.environ.copy()
     env["MCP_TRANSPORT"] = transport
     if transport == "sse":
         env["MCP_PORT"] = str(port)
 
-    console.print(f"[bold]Starting MCP server...[/bold]")
+    console.print("[bold]Starting MCP server...[/bold]")
     console.print(f"Transport: {transport}")
     if transport == "sse":
         console.print(f"Port: {port}")

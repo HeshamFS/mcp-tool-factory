@@ -12,10 +12,10 @@ Generates MCP tools for:
 - delete_<table>: Delete record by primary key
 """
 
+import re
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
-import re
 
 from tool_factory.models import ToolSpec
 
@@ -165,7 +165,8 @@ class DatabaseIntrospector:
             import psycopg2
         except ImportError:
             raise ImportError(
-                "psycopg2 is required for PostgreSQL support. Install with: pip install psycopg2-binary"
+                "psycopg2 is required for PostgreSQL support. "
+                "Install with: pip install psycopg2-binary"
             )
 
         conn = psycopg2.connect(self.connection_string)

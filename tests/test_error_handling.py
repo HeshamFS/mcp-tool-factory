@@ -1,9 +1,8 @@
 """Tests for error handling across the codebase."""
 
-import pytest
-from unittest.mock import Mock
 import tempfile
 from pathlib import Path
+from unittest.mock import Mock
 
 
 class TestValidationErrorHandling:
@@ -12,9 +11,9 @@ class TestValidationErrorHandling:
     def test_validate_none_value(self):
         """Test validation of None values."""
         from tool_factory.utils.input_validation import (
-            validate_string,
             validate_integer,
             validate_number,
+            validate_string,
         )
 
         result = validate_string(None, "test")
@@ -74,8 +73,9 @@ class TestValidationErrorHandling:
 
     def test_validate_finite(self):
         """Test validation of finite numbers."""
-        from tool_factory.utils.input_validation import validate_finite
         import math
+
+        from tool_factory.utils.input_validation import validate_finite
 
         result = validate_finite(math.inf, "test")
         assert not result.is_valid
@@ -180,8 +180,8 @@ class TestAuthErrorHandling:
     def test_pkce_challenge_generation(self):
         """Test PKCE challenge generation."""
         from tool_factory.auth.pkce import (
-            generate_code_verifier,
             generate_code_challenge,
+            generate_code_verifier,
         )
 
         verifier = generate_code_verifier()

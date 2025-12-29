@@ -1,5 +1,7 @@
 """LLM prompts for the MCP Tool Factory."""
 
+# fmt: off
+# ruff: noqa: E501
 EXTRACT_TOOLS_PROMPT = """You are a tool specification extractor. Analyze the user's description and identify distinct tools needed.
 
 For each tool, determine:
@@ -144,3 +146,4 @@ When generating tool implementations:
 - Use descriptive variable names
 - Keep functions focused and single-purpose
 - Add comments only where logic is non-obvious"""
+# fmt: on

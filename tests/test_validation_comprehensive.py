@@ -1,14 +1,13 @@
 """Comprehensive tests for validation module."""
 
 import pytest
-from pydantic import ValidationError
 
 from tool_factory.validation import (
     ToolSpecSchema,
     extract_json_from_response,
-    validate_tool_specs,
     parse_llm_tool_response,
     validate_python_code,
+    validate_tool_specs,
 )
 
 

@@ -2,7 +2,6 @@
 
 import asyncio
 import logging
-from typing import Any
 
 from tool_factory.providers.base import BaseLLMProvider, LLMResponse
 
@@ -47,7 +46,7 @@ class ClaudeCodeProvider(BaseLLMProvider):
 
     async def _async_query(self, system_prompt: str, user_prompt: str) -> str:
         """Async query using Claude Agent SDK."""
-        from claude_agent_sdk import query, ClaudeAgentOptions
+        from claude_agent_sdk import ClaudeAgentOptions, query
 
         options = ClaudeAgentOptions(
             max_turns=1,

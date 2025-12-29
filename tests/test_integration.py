@@ -5,22 +5,22 @@ These tests verify complete workflows from input to generated server.
 
 import os
 import sqlite3
-import tempfile
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 import pytest
 
 from tool_factory.database import (
-    DatabaseType,
     DatabaseIntrospector,
     DatabaseServerGenerator,
+    DatabaseType,
 )
-from tool_factory.openapi import OpenAPIParser, OpenAPIServerGenerator
 from tool_factory.generators.server import ServerGenerator
-from tool_factory.production import ProductionConfig
 from tool_factory.models import ToolSpec
+from tool_factory.openapi import OpenAPIParser, OpenAPIServerGenerator
+from tool_factory.production import ProductionConfig
 
 
 class TestDatabaseIntegrationWorkflow:
@@ -497,8 +497,8 @@ class TestEndToEndWorkflow:
     @pytest.fixture
     def temp_output_dir(self):
         """Create temporary output directory."""
-        import tempfile
         import shutil
+        import tempfile
 
         temp_dir = tempfile.mkdtemp(prefix="mcp_factory_test_")
         yield temp_dir

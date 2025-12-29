@@ -1,15 +1,17 @@
 """Comprehensive tests for web_search module."""
 
+from unittest.mock import Mock, patch
+
 import pytest
-from unittest.mock import Mock, patch, AsyncMock, MagicMock
+
+from tool_factory.config import LLMProvider
 from tool_factory.web_search import (
     SearchResult,
     WebSearcher,
+    _generate_search_queries,
     search_for_api_info,
     search_for_api_info_with_logging,
-    _generate_search_queries,
 )
-from tool_factory.config import LLMProvider
 
 
 class TestSearchResult:
@@ -290,7 +292,6 @@ class TestWebSearcher:
     def test_search_claude_code(self):
         """Test Claude Code web search."""
         import sys
-        import asyncio as real_asyncio
 
         # Mock the SDK modules
         mock_sdk = Mock()

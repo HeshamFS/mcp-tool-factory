@@ -1,12 +1,12 @@
 """Tests for validation middleware module."""
 
 import pytest
+
 from tool_factory.middleware.validation import (
-    ValidationError,
-    ValidationType,
-    SchemaValidator,
     RequestValidator,
     ResponseValidator,
+    SchemaValidator,
+    ValidationError,
     ValidationMiddleware,
     generate_validation_middleware_code,
 )

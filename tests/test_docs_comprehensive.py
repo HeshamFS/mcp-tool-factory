@@ -1,6 +1,7 @@
 """Comprehensive tests for generators/docs module."""
 
 import pytest
+
 from tool_factory.generators.docs import DocsGenerator
 from tool_factory.models import ToolSpec
 

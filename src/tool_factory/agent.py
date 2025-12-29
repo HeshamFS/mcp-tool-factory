@@ -2,13 +2,9 @@
 
 import json
 import logging
-import time
 from typing import Any
 
-from tool_factory.config import FactoryConfig, LLMProvider, get_default_config
-
-# Module logger
-logger = logging.getLogger(__name__)
+from tool_factory.config import FactoryConfig, get_default_config
 from tool_factory.execution_logger import ExecutionLogger
 from tool_factory.generators.docs import DocsGenerator
 from tool_factory.generators.server import ServerGenerator
@@ -19,10 +15,12 @@ from tool_factory.prompts import (
     SYSTEM_PROMPT,
 )
 from tool_factory.validation import (
-    extract_json_from_response,
     parse_llm_tool_response,
     validate_tool_specs,
 )
+
+# Module logger
+logger = logging.getLogger(__name__)
 
 
 class ToolFactoryAgent:
@@ -125,8 +123,8 @@ class ToolFactoryAgent:
         """
         try:
             from tool_factory.web_search import (
-                search_for_api_info_with_logging,
                 _generate_search_queries,
+                search_for_api_info_with_logging,
             )
 
             queries = _generate_search_queries(description)

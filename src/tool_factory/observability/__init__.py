@@ -4,9 +4,9 @@ Provides OpenTelemetry integration for tracing, metrics, and logging.
 """
 
 from tool_factory.observability.telemetry import (
+    TelemetryCodeGenerator,
     TelemetryConfig,
     TelemetryExporter,
-    TelemetryCodeGenerator,
     generate_telemetry_code,
 )
 

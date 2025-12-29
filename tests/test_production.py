@@ -1,11 +1,10 @@
 """Tests for production utilities module."""
 
-import pytest
 from tool_factory.production import (
     LogLevel,
-    RateLimitBackend,
-    ProductionConfig,
     ProductionCodeGenerator,
+    ProductionConfig,
+    RateLimitBackend,
     generate_production_server_additions,
 )
 

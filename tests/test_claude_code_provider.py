@@ -1,11 +1,10 @@
 """Tests for Claude Code provider."""
 
-import pytest
-from unittest.mock import Mock, patch
 import os
+from unittest.mock import patch
 
-from tool_factory.providers.claude_code import ClaudeCodeProvider
 from tool_factory.providers.base import LLMResponse
+from tool_factory.providers.claude_code import ClaudeCodeProvider
 
 
 class TestClaudeCodeProviderInit:
@@ -49,7 +48,7 @@ class TestClaudeCodeProviderCallApi:
         )
         provider._client = True
 
-        with patch.object(provider, "_async_query") as mock_query:
+        with patch.object(provider, "_async_query"):
             with patch("asyncio.run") as mock_run:
                 mock_run.return_value = "Generated response text"
 

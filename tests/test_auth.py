@@ -7,19 +7,18 @@ import time
 import pytest
 
 from tool_factory.auth import (
+    AzureADOAuth2Provider,
+    CustomOAuth2Provider,
+    GitHubOAuth2Provider,
+    GoogleOAuth2Provider,
     OAuth2Config,
     OAuth2Flow,
     OAuth2Token,
     PKCECodeVerifier,
     generate_code_challenge,
     generate_code_verifier,
-    OAuth2Provider,
-    GitHubOAuth2Provider,
-    GoogleOAuth2Provider,
-    AzureADOAuth2Provider,
-    CustomOAuth2Provider,
 )
-from tool_factory.auth.providers import get_provider, OAUTH2_PROVIDERS
+from tool_factory.auth.providers import OAUTH2_PROVIDERS, get_provider
 
 
 class TestPKCE:

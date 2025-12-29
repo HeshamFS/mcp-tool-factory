@@ -11,7 +11,6 @@ This logger captures the COMPLETE raw execution trace:
 """
 
 import json
-import time
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any
@@ -471,7 +470,9 @@ class ExecutionLogger:
             for i, call in enumerate(self.llm_calls, 1):
                 tokens_info = ""
                 if call.tokens_in or call.tokens_out:
-                    tokens_info = f" | Tokens: {call.tokens_in or '?'} in, {call.tokens_out or '?'} out"
+                    t_in = call.tokens_in or "?"
+                    t_out = call.tokens_out or "?"
+                    tokens_info = f" | Tokens: {t_in} in, {t_out} out"
 
                 lines.extend(
                     [

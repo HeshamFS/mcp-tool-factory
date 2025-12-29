@@ -1,7 +1,6 @@
 """Tests for data models."""
 
-import pytest
-from tool_factory.models import ToolSpec, GeneratedServer, InputType
+from tool_factory.models import InputType, ToolSpec
 
 
 def test_tool_spec_creation():

@@ -1,17 +1,16 @@
 """Comprehensive tests for config module."""
 
-import pytest
-from unittest.mock import patch
 import os
+from unittest.mock import patch
 
 from tool_factory.config import (
+    CLAUDE_MODELS,
+    DEFAULT_MODELS,
+    GOOGLE_MODELS,
+    OPENAI_MODELS,
     FactoryConfig,
     LLMProvider,
     get_default_config,
-    CLAUDE_MODELS,
-    OPENAI_MODELS,
-    GOOGLE_MODELS,
-    DEFAULT_MODELS,
 )
 
 

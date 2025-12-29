@@ -1,11 +1,12 @@
 """Tests for LLM provider implementations."""
 
-import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
+import pytest
+
+from tool_factory.config import LLMProvider as LLMProviderEnum
 from tool_factory.providers.base import BaseLLMProvider, LLMResponse
 from tool_factory.providers.factory import create_provider
-from tool_factory.config import LLMProvider as LLMProviderEnum
 
 
 class TestLLMResponse:

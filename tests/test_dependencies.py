@@ -1,13 +1,12 @@
 """Tests for dependency versioning utilities."""
 
-import pytest
 from tool_factory.utils.dependencies import (
-    PackageVersion,
     KNOWN_PACKAGES,
-    get_package_version,
-    generate_requirements,
-    generate_pyproject_dependencies,
+    PackageVersion,
     detect_packages_from_imports,
+    generate_pyproject_dependencies,
+    generate_requirements,
+    get_package_version,
 )
 
 
@@ -126,7 +125,7 @@ class TestGetPackageVersion:
     def test_normalized_name(self):
         """Test package name normalization."""
         req1 = get_package_version("python-dotenv")
-        req2 = get_package_version("python_dotenv")
+        get_package_version("python_dotenv")
         assert "python-dotenv" in req1
         # Both should work (normalization)
 

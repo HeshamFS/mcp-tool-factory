@@ -215,7 +215,9 @@ def start_metrics_server(port: int = {self.config.metrics_port}):
     logger.info(f"Metrics server started on port {{port}}")
 
 
-def record_tool_metrics(tool_name: str, duration_seconds: float, success: bool, error_type: str | None = None):
+def record_tool_metrics(
+    tool_name: str, duration_seconds: float, success: bool, error_type: str | None = None
+):
     """Record metrics for a tool call."""
     status = "success" if success else "error"
     TOOL_CALLS.labels(tool_name=tool_name, status=status).inc()
@@ -271,7 +273,11 @@ class MemoryRateLimiter(BaseRateLimiter):
     For distributed systems, use RedisRateLimiter instead.
     """
 
-    def __init__(self, max_requests: int = {self.config.rate_limit_requests}, window_seconds: int = {self.config.rate_limit_window_seconds}):
+    def __init__(
+        self,
+        max_requests: int = {self.config.rate_limit_requests},
+        window_seconds: int = {self.config.rate_limit_window_seconds},
+    ):
         super().__init__(max_requests, window_seconds)
         self.requests: dict[str, list[float]] = defaultdict(list)
         self.lock = Lock()
@@ -658,7 +664,9 @@ async def async_retry_with_backoff(
                 else ""
             )
             metrics_code = (
-                "record_tool_metrics(tool_name, duration_seconds, success, type(e).__name__ if error_msg else None)"
+                "record_tool_metrics("
+                "tool_name, duration_seconds, success, "
+                "type(e).__name__ if error_msg else None)"
                 if self.config.enable_metrics
                 else ""
             )

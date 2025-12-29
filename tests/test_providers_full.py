@@ -1,11 +1,12 @@
 """Full tests for provider implementations."""
 
-import pytest
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import Mock
 
-from tool_factory.providers.base import LLMResponse, BaseLLMProvider
-from tool_factory.providers.factory import create_provider
+import pytest
+
 from tool_factory.config import LLMProvider
+from tool_factory.providers.base import BaseLLMProvider, LLMResponse
+from tool_factory.providers.factory import create_provider
 
 
 class TestAnthropicProvider:
@@ -153,8 +154,9 @@ class TestClaudeCodeProvider:
 
     def test_initialize_client_sets_env(self):
         """Test that _initialize_client sets environment variable."""
-        from tool_factory.providers.claude_code import ClaudeCodeProvider
         import os
+
+        from tool_factory.providers.claude_code import ClaudeCodeProvider
 
         provider = ClaudeCodeProvider(api_key="my-token", model="claude-3")
         provider._initialize_client()
@@ -315,13 +317,13 @@ class TestProviderCallWithLogger:
 
     def test_call_with_logger(self):
         """Test that call logs to execution logger."""
-        from tool_factory.providers.anthropic import AnthropicProvider
         from tool_factory.execution_logger import ExecutionLogger
+        from tool_factory.providers.anthropic import AnthropicProvider
 
         provider = AnthropicProvider(api_key="test-key", model="claude-3")
 
         # Create a logger
-        logger = ExecutionLogger("Test", "anthropic", "claude-3")
+        ExecutionLogger("Test", "anthropic", "claude-3")
 
         # Mock the client
         mock_client = Mock()

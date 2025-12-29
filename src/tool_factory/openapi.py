@@ -606,7 +606,10 @@ def health_check() -> dict:
         query_code = ""
         if query_params:
             query_items = ", ".join(f'"{p}": {p}' for p in query_params)
-            query_code = f"params = {{{query_items}}}\n    params = {{k: v for k, v in params.items() if v is not None}}"
+            query_code = (
+                f"params = {{{query_items}}}\n"
+                "    params = {k: v for k, v in params.items() if v is not None}"
+            )
         else:
             query_code = "params = None"
 

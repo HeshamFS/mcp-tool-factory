@@ -1,7 +1,6 @@
 """Comprehensive tests for generators/server.py module."""
 
 import pytest
-from unittest.mock import Mock, patch, MagicMock
 
 from tool_factory.generators.server import ServerGenerator
 from tool_factory.models import ToolSpec

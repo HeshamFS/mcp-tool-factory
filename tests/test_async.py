@@ -1,8 +1,9 @@
 """Tests for async functionality across the codebase."""
 
-import pytest
 import asyncio
-from unittest.mock import Mock, AsyncMock, patch, MagicMock
+from unittest.mock import Mock
+
+import pytest
 
 
 class TestAsyncValidation:
@@ -12,8 +13,8 @@ class TestAsyncValidation:
     async def test_concurrent_validation(self):
         """Test running multiple validations concurrently."""
         from tool_factory.utils.input_validation import (
-            validate_string,
             validate_email,
+            validate_string,
             validate_url,
         )
 
@@ -99,7 +100,7 @@ class TestAsyncProviderPatterns:
         """Test timeout pattern for provider calls."""
         from tool_factory.providers import AnthropicProvider
 
-        provider = AnthropicProvider(
+        AnthropicProvider(
             api_key="test-key",
             model="claude-3-opus",
         )

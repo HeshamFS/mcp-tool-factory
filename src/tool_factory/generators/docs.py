@@ -20,7 +20,6 @@ class DocsGenerator:
                 return first_sentence
 
         # Analyze tools to generate tagline
-        tool_names = [spec.name for spec in tool_specs]
         tool_descriptions = [spec.description.lower() for spec in tool_specs]
         all_text = " ".join(tool_descriptions)
 
@@ -84,11 +83,12 @@ class DocsGenerator:
             or f"An MCP server providing {tool_count} tools for various operations."
         )
 
-        overview = f"""An MCP (Model Context Protocol) server that enables AI agents to perform specialized operations through a standardized interface.
-
-**{server_name}** provides {tool_count} tools including {tools_list}.
-
-{base_desc}"""
+        overview = (
+            "An MCP (Model Context Protocol) server that enables AI agents to "
+            "perform specialized operations through a standardized interface.\n\n"
+            f"**{server_name}** provides {tool_count} tools including {tools_list}.\n\n"
+            f"{base_desc}"
+        )
         return overview
 
     def _generate_tools_summary_table(self, tool_specs: list[ToolSpec]) -> list[str]:

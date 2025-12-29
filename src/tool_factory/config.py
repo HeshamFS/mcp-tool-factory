@@ -1,10 +1,9 @@
 """Configuration for MCP Tool Factory."""
 
 import os
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any
 
 from dotenv import load_dotenv
 

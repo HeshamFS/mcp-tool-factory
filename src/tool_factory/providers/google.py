@@ -1,7 +1,6 @@
 """Google (Gemini) provider implementation."""
 
 import logging
-from typing import Any
 
 from tool_factory.providers.base import BaseLLMProvider, LLMResponse
 

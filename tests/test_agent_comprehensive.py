@@ -1,13 +1,11 @@
 """Comprehensive tests for the ToolFactoryAgent."""
 
-import pytest
-from unittest.mock import Mock, patch, MagicMock
-import json
-import sys
+from unittest.mock import Mock, patch
 
-from tool_factory.models import ToolSpec, GeneratedServer
+import pytest
+
+from tool_factory.models import ToolSpec
 from tool_factory.providers.base import LLMResponse
-from tool_factory.config import LLMProvider
 
 
 class TestToolFactoryAgentInit:

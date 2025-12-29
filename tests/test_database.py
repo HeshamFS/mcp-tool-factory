@@ -3,14 +3,15 @@
 import os
 import sqlite3
 import tempfile
+
 import pytest
 
 from tool_factory.database import (
-    DatabaseType,
     ColumnInfo,
-    TableInfo,
     DatabaseIntrospector,
     DatabaseServerGenerator,
+    DatabaseType,
+    TableInfo,
 )
 
 

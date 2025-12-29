@@ -3,15 +3,14 @@
 import tempfile
 from pathlib import Path
 
-import pytest
 from tool_factory.security import (
-    SecurityScanner,
-    SecurityIssue,
     IssueSeverity,
+    SecurityIssue,
+    SecurityScanner,
     scan_code,
     scan_file,
 )
-from tool_factory.security.scanner import generate_security_report, ScanRule
+from tool_factory.security.scanner import ScanRule, generate_security_report
 
 
 class TestIssueSeverity:

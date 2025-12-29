@@ -1,10 +1,10 @@
 """Comprehensive tests for providers module."""
 
-import pytest
-from unittest.mock import Mock, patch
-import sys
+from unittest.mock import patch
 
-from tool_factory.providers.base import LLMResponse, BaseLLMProvider
+import pytest
+
+from tool_factory.providers.base import BaseLLMProvider, LLMResponse
 
 
 class TestLLMResponse:

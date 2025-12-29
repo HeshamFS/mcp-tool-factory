@@ -1,10 +1,9 @@
 """Tests for observability/telemetry module."""
 
-import pytest
 from tool_factory.observability import (
+    TelemetryCodeGenerator,
     TelemetryConfig,
     TelemetryExporter,
-    TelemetryCodeGenerator,
     generate_telemetry_code,
 )
 
