@@ -30,7 +30,7 @@ class TestPKCE:
         verifier = generate_code_verifier()
         assert len(verifier) == 64
         # Verify it's base64url safe characters
-        assert all(c.isalnum() or c in '-_' for c in verifier)
+        assert all(c.isalnum() or c in "-_" for c in verifier)
 
     def test_generate_code_verifier_custom_length(self):
         """Test code verifier generation with custom length."""
@@ -54,8 +54,10 @@ class TestPKCE:
         challenge = generate_code_challenge(verifier, method="S256")
 
         # Verify by recreating the challenge
-        expected_digest = hashlib.sha256(verifier.encode('ascii')).digest()
-        expected_challenge = base64.urlsafe_b64encode(expected_digest).decode('ascii').rstrip('=')
+        expected_digest = hashlib.sha256(verifier.encode("ascii")).digest()
+        expected_challenge = (
+            base64.urlsafe_b64encode(expected_digest).decode("ascii").rstrip("=")
+        )
 
         assert challenge == expected_challenge
 
@@ -378,7 +380,9 @@ class TestOAuth2Providers:
         config = provider.get_config(client_id="google_client_123")
 
         assert config.provider_name == "google"
-        assert config.authorization_url == "https://accounts.google.com/o/oauth2/v2/auth"
+        assert (
+            config.authorization_url == "https://accounts.google.com/o/oauth2/v2/auth"
+        )
         assert config.token_url == "https://oauth2.googleapis.com/token"
         assert config.revoke_url == "https://oauth2.googleapis.com/revoke"
         assert "openid" in config.scopes

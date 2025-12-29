@@ -49,7 +49,9 @@ class TestProviderFactory:
 
     def test_create_anthropic_provider(self):
         """Test creating Anthropic provider."""
-        with patch('tool_factory.providers.anthropic.AnthropicProvider._initialize_client'):
+        with patch(
+            "tool_factory.providers.anthropic.AnthropicProvider._initialize_client"
+        ):
             provider = create_provider(
                 provider=LLMProviderEnum.ANTHROPIC,
                 api_key="test-key",
@@ -60,7 +62,7 @@ class TestProviderFactory:
 
     def test_create_openai_provider(self):
         """Test creating OpenAI provider."""
-        with patch('tool_factory.providers.openai.OpenAIProvider._initialize_client'):
+        with patch("tool_factory.providers.openai.OpenAIProvider._initialize_client"):
             provider = create_provider(
                 provider=LLMProviderEnum.OPENAI,
                 api_key="test-key",
@@ -71,7 +73,7 @@ class TestProviderFactory:
 
     def test_create_google_provider(self):
         """Test creating Google provider."""
-        with patch('tool_factory.providers.google.GoogleProvider._initialize_client'):
+        with patch("tool_factory.providers.google.GoogleProvider._initialize_client"):
             provider = create_provider(
                 provider=LLMProviderEnum.GOOGLE,
                 api_key="test-key",
@@ -82,7 +84,9 @@ class TestProviderFactory:
 
     def test_create_provider_from_string(self):
         """Test creating provider from string."""
-        with patch('tool_factory.providers.anthropic.AnthropicProvider._initialize_client'):
+        with patch(
+            "tool_factory.providers.anthropic.AnthropicProvider._initialize_client"
+        ):
             provider = create_provider(
                 provider="anthropic",
                 api_key="test-key",
@@ -105,6 +109,7 @@ class TestBaseLLMProvider:
 
     def test_call_with_error_returns_error_response(self):
         """Test that errors are captured in response."""
+
         class FailingProvider(BaseLLMProvider):
             def _initialize_client(self):
                 pass
@@ -122,12 +127,14 @@ class TestBaseLLMProvider:
 
     def test_call_measures_latency(self):
         """Test that latency is measured."""
+
         class SlowProvider(BaseLLMProvider):
             def _initialize_client(self):
                 pass
 
             def _call_api(self, system_prompt, user_prompt, max_tokens):
                 import time
+
                 time.sleep(0.01)  # 10ms
                 return LLMResponse(text="OK")
 
@@ -138,6 +145,7 @@ class TestBaseLLMProvider:
 
     def test_provider_name(self):
         """Test provider name property."""
+
         class MyCustomProvider(BaseLLMProvider):
             def _initialize_client(self):
                 pass

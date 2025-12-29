@@ -141,9 +141,7 @@ class TestOpenAPIParser:
                 "version": "1.0.0",
                 "description": "A test API",
             },
-            "servers": [
-                {"url": "https://api.example.com/v1"}
-            ],
+            "servers": [{"url": "https://api.example.com/v1"}],
             "paths": {
                 "/users": {
                     "get": {
@@ -164,9 +162,7 @@ class TestOpenAPIParser:
                         "summary": "Create a user",
                         "requestBody": {
                             "content": {
-                                "application/json": {
-                                    "schema": {"type": "object"}
-                                }
+                                "application/json": {"schema": {"type": "object"}}
                             }
                         },
                         "responses": {"201": {"description": "Created"}},

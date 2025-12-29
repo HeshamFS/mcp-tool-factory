@@ -81,26 +81,26 @@ class TestSecurityScanner:
     # Credential detection tests
     def test_detects_hardcoded_password(self):
         """Test detection of hardcoded passwords."""
-        code = '''
+        code = """
 password = "supersecret123"
-'''
+"""
         issues = scan_code(code)
         assert any(i.category == "credentials" for i in issues)
         assert any("password" in i.message.lower() for i in issues)
 
     def test_detects_hardcoded_api_key(self):
         """Test detection of hardcoded API keys."""
-        code = '''
+        code = """
 api_key = "sk_test_FAKE_KEY_FOR_TESTING_ONLY_12345"
-'''
+"""
         issues = scan_code(code)
         assert any("api key" in i.message.lower() for i in issues)
 
     def test_ignores_env_var_password(self):
         """Test ignores password from environment."""
-        code = '''
+        code = """
 password = os.getenv("PASSWORD")
-'''
+"""
         issues = scan_code(code)
         cred_issues = [i for i in issues if i.category == "credentials"]
         assert len(cred_issues) == 0
@@ -108,58 +108,58 @@ password = os.getenv("PASSWORD")
     # SQL injection tests
     def test_detects_sql_injection_fstring(self):
         """Test detection of SQL injection via f-string."""
-        code = '''
+        code = """
 cursor.execute(f"SELECT * FROM users WHERE id = {user_id}")
-'''
+"""
         issues = scan_code(code)
         assert any("sql" in i.message.lower() for i in issues)
 
     def test_detects_sql_injection_concat(self):
         """Test detection of SQL injection via concatenation."""
-        code = '''
+        code = """
 cursor.execute("SELECT * FROM users WHERE id = " + user_id)
-'''
+"""
         issues = scan_code(code)
         assert any("sql" in i.message.lower() for i in issues)
 
     # Command injection tests
     def test_detects_os_system(self):
         """Test detection of os.system()."""
-        code = '''
+        code = """
 os.system("rm -rf " + user_input)
-'''
+"""
         issues = scan_code(code)
         assert any("os.system" in i.message for i in issues)
 
     def test_detects_subprocess_shell_true(self):
         """Test detection of subprocess with shell=True."""
-        code = '''
+        code = """
 subprocess.run(cmd, shell=True)
-'''
+"""
         issues = scan_code(code)
         assert any("shell=True" in i.message for i in issues)
 
     def test_detects_eval(self):
         """Test detection of eval()."""
-        code = '''
+        code = """
 result = eval(user_input)
-'''
+"""
         issues = scan_code(code)
         assert any("eval" in i.message.lower() for i in issues)
 
     def test_detects_exec(self):
         """Test detection of exec()."""
-        code = '''
+        code = """
 exec(code_string)
-'''
+"""
         issues = scan_code(code)
         assert any("exec" in i.message.lower() for i in issues)
 
     def test_ignores_commented_eval(self):
         """Test ignores commented eval."""
-        code = '''
+        code = """
 # eval(user_input) - don't use this
-'''
+"""
         issues = scan_code(code)
         eval_issues = [i for i in issues if "eval" in i.message.lower()]
         assert len(eval_issues) == 0
@@ -167,59 +167,61 @@ exec(code_string)
     # Cryptography tests
     def test_detects_insecure_random(self):
         """Test detection of insecure random."""
-        code = '''
+        code = """
 token = random.randint(0, 1000000)
-'''
+"""
         issues = scan_code(code)
         assert any("random" in i.message.lower() for i in issues)
 
     def test_detects_weak_md5(self):
         """Test detection of MD5."""
-        code = '''
+        code = """
 hash = hashlib.md5(data)
-'''
+"""
         issues = scan_code(code)
         assert any("md5" in i.message.lower() for i in issues)
 
     def test_detects_weak_sha1(self):
         """Test detection of SHA-1."""
-        code = '''
+        code = """
 hash = hashlib.sha1(data)
-'''
+"""
         issues = scan_code(code)
-        assert any("sha-1" in i.message.lower() or "sha1" in i.message.lower() for i in issues)
+        assert any(
+            "sha-1" in i.message.lower() or "sha1" in i.message.lower() for i in issues
+        )
 
     # Deserialization tests
     def test_detects_pickle_load(self):
         """Test detection of pickle.load()."""
-        code = '''
+        code = """
 data = pickle.load(file)
-'''
+"""
         issues = scan_code(code)
         assert any("pickle" in i.message.lower() for i in issues)
 
     def test_detects_unsafe_yaml(self):
         """Test detection of unsafe yaml.load()."""
-        code = '''
+        code = """
 data = yaml.load(file)
-'''
+"""
         issues = scan_code(code)
         assert any("yaml" in i.message.lower() for i in issues)
 
     # Configuration tests
     def test_detects_debug_true(self):
         """Test detection of debug=True."""
-        code = '''
+        code = """
 DEBUG = True
-'''
+"""
         issues = scan_code(code)
         assert any("debug" in i.message.lower() for i in issues)
 
     def test_detects_ssl_verify_false(self):
         """Test detection of verify=False."""
-        code = '''
+        code = """
 requests.get(url, verify=False)
-'''
+"""
         issues = scan_code(code)
         assert any("ssl" in i.message.lower() for i in issues)
 
@@ -312,10 +314,10 @@ class TestScanCodeConvenience:
 
     def test_scan_clean_code(self):
         """Test scanning clean code."""
-        code = '''
+        code = """
 def add(a, b):
     return a + b
-'''
+"""
         issues = scan_code(code)
         # Should have no or minimal issues
         critical = [i for i in issues if i.severity == IssueSeverity.CRITICAL]
@@ -323,10 +325,10 @@ def add(a, b):
 
     def test_scan_vulnerable_code(self):
         """Test scanning vulnerable code."""
-        code = '''
+        code = """
 password = "admin123"
 cursor.execute(f"SELECT * FROM users WHERE name = {name}")
 os.system(command)
-'''
+"""
         issues = scan_code(code)
         assert len(issues) >= 3  # At least password, SQL injection, command injection

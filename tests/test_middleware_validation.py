@@ -256,11 +256,14 @@ class TestRequestValidator:
     def test_add_and_validate_schema(self):
         """Test adding and validating schema."""
         validator = RequestValidator()
-        validator.add_schema("get_user", {
-            "type": "object",
-            "properties": {"id": {"type": "integer"}},
-            "required": ["id"],
-        })
+        validator.add_schema(
+            "get_user",
+            {
+                "type": "object",
+                "properties": {"id": {"type": "integer"}},
+                "required": ["id"],
+            },
+        )
 
         is_valid, coerced, errors = validator.validate("get_user", {"id": 123})
         assert is_valid
@@ -282,10 +285,13 @@ class TestRequestValidator:
     def test_coerce_types(self):
         """Test type coercion in request validation."""
         validator = RequestValidator(coerce_types=True)
-        validator.add_schema("test", {
-            "type": "object",
-            "properties": {"count": {"type": "integer"}},
-        })
+        validator.add_schema(
+            "test",
+            {
+                "type": "object",
+                "properties": {"count": {"type": "integer"}},
+            },
+        )
 
         is_valid, coerced, _ = validator.validate("test", {"count": "42"})
         assert is_valid
@@ -298,13 +304,16 @@ class TestResponseValidator:
     def test_validate_response(self):
         """Test response validation."""
         validator = ResponseValidator()
-        validator.add_schema("get_user", {
-            "type": "object",
-            "properties": {
-                "id": {"type": "integer"},
-                "name": {"type": "string"},
+        validator.add_schema(
+            "get_user",
+            {
+                "type": "object",
+                "properties": {
+                    "id": {"type": "integer"},
+                    "name": {"type": "string"},
+                },
             },
-        })
+        )
 
         is_valid, errors = validator.validate("get_user", {"id": 1, "name": "John"})
         assert is_valid
@@ -312,10 +321,13 @@ class TestResponseValidator:
     def test_validate_invalid_response(self):
         """Test invalid response detection."""
         validator = ResponseValidator(log_warnings=False)
-        validator.add_schema("get_user", {
-            "type": "object",
-            "properties": {"id": {"type": "integer"}},
-        })
+        validator.add_schema(
+            "get_user",
+            {
+                "type": "object",
+                "properties": {"id": {"type": "integer"}},
+            },
+        )
 
         is_valid, errors = validator.validate("get_user", {"id": "not_an_int"})
         assert not is_valid
@@ -339,13 +351,16 @@ class TestValidationMiddleware:
     def test_wrap_function_valid_input(self):
         """Test wrapper with valid input."""
         middleware = ValidationMiddleware()
-        middleware.register_tool("add", {
-            "type": "object",
-            "properties": {
-                "a": {"type": "integer"},
-                "b": {"type": "integer"},
+        middleware.register_tool(
+            "add",
+            {
+                "type": "object",
+                "properties": {
+                    "a": {"type": "integer"},
+                    "b": {"type": "integer"},
+                },
             },
-        })
+        )
 
         @middleware.wrap("add")
         def add(a: int, b: int) -> int:
@@ -357,14 +372,17 @@ class TestValidationMiddleware:
     def test_wrap_function_invalid_input(self):
         """Test wrapper raises on invalid input."""
         middleware = ValidationMiddleware(raise_on_request_error=True)
-        middleware.register_tool("add", {
-            "type": "object",
-            "properties": {
-                "a": {"type": "integer"},
-                "b": {"type": "integer"},
+        middleware.register_tool(
+            "add",
+            {
+                "type": "object",
+                "properties": {
+                    "a": {"type": "integer"},
+                    "b": {"type": "integer"},
+                },
+                "required": ["a", "b"],
             },
-            "required": ["a", "b"],
-        })
+        )
 
         @middleware.wrap("add")
         def add(a: int, b: int) -> int:
@@ -377,10 +395,13 @@ class TestValidationMiddleware:
         """Test wrapper coerces input types."""
         middleware = ValidationMiddleware()
         middleware.request_validator.coerce_types = True
-        middleware.register_tool("greet", {
-            "type": "object",
-            "properties": {"count": {"type": "integer"}},
-        })
+        middleware.register_tool(
+            "greet",
+            {
+                "type": "object",
+                "properties": {"count": {"type": "integer"}},
+            },
+        )
 
         @middleware.wrap("greet")
         def greet(count: int) -> str:
@@ -412,9 +433,7 @@ class TestValidationMiddleware:
                         "responses": {
                             "200": {
                                 "content": {
-                                    "application/json": {
-                                        "schema": {"type": "object"}
-                                    }
+                                    "application/json": {"schema": {"type": "object"}}
                                 }
                             }
                         },
@@ -474,7 +493,10 @@ class TestGenerateValidationCode:
         tool_specs = [
             {
                 "name": "test",
-                "input_schema": {"type": "object", "properties": {"x": {"type": "integer"}}},
+                "input_schema": {
+                    "type": "object",
+                    "properties": {"x": {"type": "integer"}},
+                },
             }
         ]
 

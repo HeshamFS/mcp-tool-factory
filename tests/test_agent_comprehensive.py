@@ -41,6 +41,7 @@ class TestExtractSpecsFromOpenAPI:
             # Mock environment to have an API key
             with patch.dict("os.environ", {"ANTHROPIC_API_KEY": "test-key"}):
                 from tool_factory.agent import ToolFactoryAgent
+
                 return ToolFactoryAgent()
 
     def test_extract_specs_from_openapi_basic(self, agent):
@@ -51,7 +52,7 @@ class TestExtractSpecsFromOpenAPI:
                     "get": {
                         "operationId": "listUsers",
                         "summary": "List users",
-                        "parameters": []
+                        "parameters": [],
                     }
                 }
             }
@@ -64,15 +65,7 @@ class TestExtractSpecsFromOpenAPI:
 
     def test_extract_specs_generates_name_from_path(self, agent):
         """Test name generation when operationId is missing."""
-        openapi_spec = {
-            "paths": {
-                "/items": {
-                    "get": {
-                        "summary": "Get items"
-                    }
-                }
-            }
-        }
+        openapi_spec = {"paths": {"/items": {"get": {"summary": "Get items"}}}}
 
         specs = agent._extract_specs_from_openapi(openapi_spec)
 
@@ -108,9 +101,9 @@ class TestExtractSpecsFromOpenAPI:
                                 "in": "path",
                                 "required": True,
                                 "schema": {"type": "string"},
-                                "description": "User ID"
+                                "description": "User ID",
                             }
-                        ]
+                        ],
                     }
                 }
             }
@@ -162,6 +155,7 @@ class TestGenerateImplementation:
 
             with patch.dict("os.environ", {"ANTHROPIC_API_KEY": "test-key"}):
                 from tool_factory.agent import ToolFactoryAgent
+
                 agent = ToolFactoryAgent()
                 return agent, mock_provider
 
@@ -181,7 +175,7 @@ class TestGenerateImplementation:
         spec = ToolSpec(
             name="test_tool",
             description="Test",
-            input_schema={"type": "object", "properties": {}}
+            input_schema={"type": "object", "properties": {}},
         )
 
         impl = agent._generate_implementation_sync(spec)
@@ -189,7 +183,9 @@ class TestGenerateImplementation:
         assert "```" not in impl
         assert "return {'result': True}" in impl
 
-    def test_generate_implementation_strips_plain_markdown(self, agent_with_mock_provider):
+    def test_generate_implementation_strips_plain_markdown(
+        self, agent_with_mock_provider
+    ):
         """Test plain markdown code blocks are stripped."""
         agent, mock_provider = agent_with_mock_provider
 
@@ -205,7 +201,7 @@ class TestGenerateImplementation:
         spec = ToolSpec(
             name="test_tool",
             description="Test",
-            input_schema={"type": "object", "properties": {}}
+            input_schema={"type": "object", "properties": {}},
         )
 
         impl = agent._generate_implementation_sync(spec)
@@ -226,6 +222,7 @@ class TestCallLLM:
 
             with patch.dict("os.environ", {"ANTHROPIC_API_KEY": "test-key"}):
                 from tool_factory.agent import ToolFactoryAgent
+
                 agent = ToolFactoryAgent()
                 return agent, mock_provider
 
@@ -276,6 +273,7 @@ class TestSearchForContext:
 
             with patch.dict("os.environ", {"ANTHROPIC_API_KEY": "test-key"}):
                 from tool_factory.agent import ToolFactoryAgent
+
                 return ToolFactoryAgent()
 
     def test_search_method_exists(self, agent):
@@ -301,16 +299,19 @@ class TestAgentServerGenerator:
 
             with patch.dict("os.environ", {"ANTHROPIC_API_KEY": "test-key"}):
                 from tool_factory.agent import ToolFactoryAgent
+
                 return ToolFactoryAgent()
 
     def test_agent_has_server_generator(self, agent):
         """Test agent has a server generator."""
         from tool_factory.generators.server import ServerGenerator
+
         assert hasattr(agent, "server_generator")
         assert isinstance(agent.server_generator, ServerGenerator)
 
     def test_agent_has_docs_generator(self, agent):
         """Test agent has a docs generator."""
         from tool_factory.generators.docs import DocsGenerator
+
         assert hasattr(agent, "docs_generator")
         assert isinstance(agent.docs_generator, DocsGenerator)

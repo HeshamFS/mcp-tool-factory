@@ -5,7 +5,12 @@ from unittest.mock import Mock, patch
 import json
 import time
 
-from tool_factory.execution_logger import ExecutionLogger, RawLLMCall, RawWebSearch, ExecutionStep
+from tool_factory.execution_logger import (
+    ExecutionLogger,
+    RawLLMCall,
+    RawWebSearch,
+    ExecutionStep,
+)
 
 
 class TestExecutionLoggerInit:

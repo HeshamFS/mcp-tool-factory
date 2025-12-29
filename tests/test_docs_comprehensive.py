@@ -84,7 +84,7 @@ class TestDocsGeneratorReadme:
         assert "units" in readme
         assert "City name" in readme
         assert "Yes" in readme  # Required
-        assert "No" in readme   # Optional
+        assert "No" in readme  # Optional
 
     def test_generate_readme_with_output_schema(self, generator):
         """Test generating README with output schema."""

@@ -60,6 +60,7 @@ class ClaudeCodeProvider(BaseLLMProvider):
             # Handle structured output if available
             if hasattr(message, "structured_output") and message.structured_output:
                 import json
+
                 return json.dumps(message.structured_output)
 
             # Handle AssistantMessage with content blocks

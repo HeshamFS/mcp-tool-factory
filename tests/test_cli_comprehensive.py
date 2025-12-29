@@ -238,12 +238,17 @@ class TestGenerateMocked:
 
         with patch("tool_factory.agent.ToolFactoryAgent", return_value=mock_agent):
             with runner.isolated_filesystem():
-                result = runner.invoke(cli, [
-                    "generate",
-                    "Create test tool",
-                    "--name", "TestServer",
-                    "--output", "./output"
-                ])
+                result = runner.invoke(
+                    cli,
+                    [
+                        "generate",
+                        "Create test tool",
+                        "--name",
+                        "TestServer",
+                        "--output",
+                        "./output",
+                    ],
+                )
 
                 # Agent should be called
                 mock_agent.generate_from_description_sync.assert_called_once()
@@ -260,12 +265,16 @@ class TestGenerateMocked:
 
         with patch("tool_factory.agent.ToolFactoryAgent", return_value=mock_agent):
             with runner.isolated_filesystem():
-                result = runner.invoke(cli, [
-                    "generate",
-                    "Weather API tool",
-                    "--web-search",
-                    "--output", "./output"
-                ])
+                result = runner.invoke(
+                    cli,
+                    [
+                        "generate",
+                        "Weather API tool",
+                        "--web-search",
+                        "--output",
+                        "./output",
+                    ],
+                )
 
                 call_kwargs = mock_agent.generate_from_description_sync.call_args.kwargs
                 assert call_kwargs.get("web_search") is True
@@ -282,13 +291,19 @@ class TestGenerateMocked:
 
         with patch("tool_factory.agent.ToolFactoryAgent", return_value=mock_agent):
             with runner.isolated_filesystem():
-                result = runner.invoke(cli, [
-                    "generate",
-                    "API tool",
-                    "--auth", "API_KEY",
-                    "--auth", "SECRET",
-                    "--output", "./output"
-                ])
+                result = runner.invoke(
+                    cli,
+                    [
+                        "generate",
+                        "API tool",
+                        "--auth",
+                        "API_KEY",
+                        "--auth",
+                        "SECRET",
+                        "--output",
+                        "./output",
+                    ],
+                )
 
                 call_kwargs = mock_agent.generate_from_description_sync.call_args.kwargs
                 auth_vars = call_kwargs.get("auth_env_vars", [])
@@ -307,13 +322,18 @@ class TestGenerateMocked:
 
         with patch("tool_factory.agent.ToolFactoryAgent", return_value=mock_agent):
             with runner.isolated_filesystem():
-                result = runner.invoke(cli, [
-                    "generate",
-                    "Test tool",
-                    "--metrics",
-                    "--rate-limit", "100",
-                    "--output", "./output"
-                ])
+                result = runner.invoke(
+                    cli,
+                    [
+                        "generate",
+                        "Test tool",
+                        "--metrics",
+                        "--rate-limit",
+                        "100",
+                        "--output",
+                        "./output",
+                    ],
+                )
 
                 call_kwargs = mock_agent.generate_from_description_sync.call_args.kwargs
                 prod_config = call_kwargs.get("production_config")
@@ -333,12 +353,16 @@ class TestGenerateMocked:
 
         with patch("tool_factory.agent.ToolFactoryAgent", return_value=mock_agent):
             with runner.isolated_filesystem():
-                result = runner.invoke(cli, [
-                    "generate",
-                    "Test tool",
-                    "--no-health-check",
-                    "--output", "./output"
-                ])
+                result = runner.invoke(
+                    cli,
+                    [
+                        "generate",
+                        "Test tool",
+                        "--no-health-check",
+                        "--output",
+                        "./output",
+                    ],
+                )
 
                 call_kwargs = mock_agent.generate_from_description_sync.call_args.kwargs
                 assert call_kwargs.get("include_health_check") is False
@@ -355,12 +379,17 @@ class TestGenerateMocked:
 
         with patch("tool_factory.agent.ToolFactoryAgent", return_value=mock_agent):
             with runner.isolated_filesystem():
-                result = runner.invoke(cli, [
-                    "generate",
-                    "Test tool",
-                    "--provider", "openai",
-                    "--output", "./output"
-                ])
+                result = runner.invoke(
+                    cli,
+                    [
+                        "generate",
+                        "Test tool",
+                        "--provider",
+                        "openai",
+                        "--output",
+                        "./output",
+                    ],
+                )
 
                 mock_agent.generate_from_description_sync.assert_called_once()
 
@@ -376,13 +405,19 @@ class TestGenerateMocked:
 
         with patch("tool_factory.agent.ToolFactoryAgent", return_value=mock_agent):
             with runner.isolated_filesystem():
-                result = runner.invoke(cli, [
-                    "generate",
-                    "Test tool",
-                    "--provider", "anthropic",
-                    "--model", "claude-3-5-sonnet-20241022",
-                    "--output", "./output"
-                ])
+                result = runner.invoke(
+                    cli,
+                    [
+                        "generate",
+                        "Test tool",
+                        "--provider",
+                        "anthropic",
+                        "--model",
+                        "claude-3-5-sonnet-20241022",
+                        "--output",
+                        "./output",
+                    ],
+                )
 
                 mock_agent.generate_from_description_sync.assert_called_once()
 
@@ -398,14 +433,15 @@ class TestGenerateMocked:
 
         with patch("tool_factory.agent.ToolFactoryAgent", return_value=mock_agent):
             with runner.isolated_filesystem():
-                result = runner.invoke(cli, [
-                    "generate",
-                    "Test tool",
-                    "--output", "./output"
-                ])
+                result = runner.invoke(
+                    cli, ["generate", "Test tool", "--output", "./output"]
+                )
 
                 # Should mention execution log
-                assert "EXECUTION_LOG" in result.output or "execution" in result.output.lower()
+                assert (
+                    "EXECUTION_LOG" in result.output
+                    or "execution" in result.output.lower()
+                )
 
     def test_generate_no_logging_flag(self, runner):
         """Test generate with no-logging flag."""
@@ -419,12 +455,10 @@ class TestGenerateMocked:
 
         with patch("tool_factory.agent.ToolFactoryAgent", return_value=mock_agent):
             with runner.isolated_filesystem():
-                result = runner.invoke(cli, [
-                    "generate",
-                    "Test tool",
-                    "--no-logging",
-                    "--output", "./output"
-                ])
+                result = runner.invoke(
+                    cli,
+                    ["generate", "Test tool", "--no-logging", "--output", "./output"],
+                )
 
                 call_kwargs = mock_agent.generate_from_description_sync.call_args.kwargs
                 prod_config = call_kwargs.get("production_config")
@@ -442,12 +476,10 @@ class TestGenerateMocked:
 
         with patch("tool_factory.agent.ToolFactoryAgent", return_value=mock_agent):
             with runner.isolated_filesystem():
-                result = runner.invoke(cli, [
-                    "generate",
-                    "Test tool",
-                    "--no-retries",
-                    "--output", "./output"
-                ])
+                result = runner.invoke(
+                    cli,
+                    ["generate", "Test tool", "--no-retries", "--output", "./output"],
+                )
 
                 call_kwargs = mock_agent.generate_from_description_sync.call_args.kwargs
                 prod_config = call_kwargs.get("production_config")
@@ -476,15 +508,16 @@ class TestFromOpenAPIMocked:
         with patch("tool_factory.openapi.OpenAPIParser", return_value=mock_parser):
             with patch("tool_factory.agent.ToolFactoryAgent", return_value=mock_agent):
                 with runner.isolated_filesystem():
-                    spec = {"openapi": "3.0.0", "info": {"title": "Test", "version": "1.0"}}
+                    spec = {
+                        "openapi": "3.0.0",
+                        "info": {"title": "Test", "version": "1.0"},
+                    }
                     with open("spec.json", "w") as f:
                         json.dump(spec, f)
 
-                    result = runner.invoke(cli, [
-                        "from-openapi",
-                        "spec.json",
-                        "--output", "./output"
-                    ])
+                    result = runner.invoke(
+                        cli, ["from-openapi", "spec.json", "--output", "./output"]
+                    )
 
                     mock_parser.get_info.assert_called()
 
@@ -509,14 +542,21 @@ class TestFromOpenAPIMocked:
             with patch("tool_factory.agent.ToolFactoryAgent", return_value=mock_agent):
                 with runner.isolated_filesystem():
                     with open("spec.yaml", "w") as f:
-                        f.write("openapi: '3.0.0'\ninfo:\n  title: Test\n  version: '1.0'")
+                        f.write(
+                            "openapi: '3.0.0'\ninfo:\n  title: Test\n  version: '1.0'"
+                        )
 
-                    result = runner.invoke(cli, [
-                        "from-openapi",
-                        "spec.yaml",
-                        "--name", "CustomServer",
-                        "--output", "./output"
-                    ])
+                    result = runner.invoke(
+                        cli,
+                        [
+                            "from-openapi",
+                            "spec.yaml",
+                            "--name",
+                            "CustomServer",
+                            "--output",
+                            "./output",
+                        ],
+                    )
 
                     mock_parser.get_info.assert_called()
 
@@ -542,12 +582,17 @@ class TestFromOpenAPIMocked:
                     with open("spec.json", "w") as f:
                         json.dump({"openapi": "3.0.0"}, f)
 
-                    result = runner.invoke(cli, [
-                        "from-openapi",
-                        "spec.json",
-                        "--base-url", "https://custom.api.com",
-                        "--output", "./output"
-                    ])
+                    result = runner.invoke(
+                        cli,
+                        [
+                            "from-openapi",
+                            "spec.json",
+                            "--base-url",
+                            "https://custom.api.com",
+                            "--output",
+                            "./output",
+                        ],
+                    )
 
                     # Base URL passed to agent
                     call_args = mock_agent.generate_from_openapi.call_args
@@ -626,12 +671,9 @@ class TestServeCommandMocked:
                 with open("server/server.py", "w") as f:
                     f.write("print('server')")
 
-                result = runner.invoke(cli, [
-                    "serve",
-                    "server",
-                    "--transport", "sse",
-                    "--port", "9000"
-                ])
+                result = runner.invoke(
+                    cli, ["serve", "server", "--transport", "sse", "--port", "9000"]
+                )
 
                 mock_run.assert_called_once()
 
@@ -669,12 +711,17 @@ class TestOutputPathHandling:
 
         with patch("tool_factory.agent.ToolFactoryAgent", return_value=mock_agent):
             with runner.isolated_filesystem():
-                result = runner.invoke(cli, [
-                    "generate",
-                    "Test tool",
-                    "--name", "MyTestServer",
-                    "--output", "./servers"
-                ])
+                result = runner.invoke(
+                    cli,
+                    [
+                        "generate",
+                        "Test tool",
+                        "--name",
+                        "MyTestServer",
+                        "--output",
+                        "./servers",
+                    ],
+                )
 
                 # Verify write_to_directory was called with subdirectory
                 call_args = mock_result.write_to_directory.call_args[0][0]
@@ -692,12 +739,17 @@ class TestOutputPathHandling:
 
         with patch("tool_factory.agent.ToolFactoryAgent", return_value=mock_agent):
             with runner.isolated_filesystem():
-                result = runner.invoke(cli, [
-                    "generate",
-                    "Test tool",
-                    "--name", "TestServer",
-                    "--output", "./custom_output"
-                ])
+                result = runner.invoke(
+                    cli,
+                    [
+                        "generate",
+                        "Test tool",
+                        "--name",
+                        "TestServer",
+                        "--output",
+                        "./custom_output",
+                    ],
+                )
 
                 # Verify write_to_directory was called with exact path
                 call_args = mock_result.write_to_directory.call_args[0][0]

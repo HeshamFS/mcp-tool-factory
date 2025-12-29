@@ -68,11 +68,11 @@ class TestExtractJsonFromResponse:
 
     def test_json_in_code_block(self):
         """Test extraction from markdown code block."""
-        response = '''Here are the tools:
+        response = """Here are the tools:
 ```json
 [{"name": "test", "description": "A test"}]
 ```
-'''
+"""
         result = extract_json_from_response(response)
         assert "[" in result
         assert '"name"' in result
@@ -160,20 +160,20 @@ class TestValidatePythonCode:
 
     def test_valid_code(self):
         """Test validation of valid Python code."""
-        code = '''
+        code = """
 def hello():
     return "world"
-'''
+"""
         is_valid, error = validate_python_code(code)
         assert is_valid
         assert error is None
 
     def test_invalid_code(self):
         """Test validation of invalid Python code."""
-        code = '''
+        code = """
 def hello(:
     return "world"
-'''
+"""
         is_valid, error = validate_python_code(code)
         assert not is_valid
         assert "Syntax error" in error

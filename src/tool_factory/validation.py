@@ -24,22 +24,22 @@ class ToolSpecSchema(BaseModel):
     implementation_hints: str | None = None
     dependencies: list[str] = Field(default_factory=list)
 
-    @field_validator('name', mode='before')
+    @field_validator("name", mode="before")
     @classmethod
     def validate_name(cls, v: str) -> str:
         """Ensure name is a valid Python identifier."""
         if not isinstance(v, str):
             v = str(v)
         # Convert to lowercase and replace spaces/hyphens with underscores
-        v = v.lower().replace('-', '_').replace(' ', '_')
+        v = v.lower().replace("-", "_").replace(" ", "_")
         # Remove non-alphanumeric characters except underscores
-        v = re.sub(r'[^a-z0-9_]', '', v)
+        v = re.sub(r"[^a-z0-9_]", "", v)
         # Ensure starts with a letter
         if v and not v[0].isalpha():
-            v = 'tool_' + v
-        return v or 'unnamed_tool'
+            v = "tool_" + v
+        return v or "unnamed_tool"
 
-    @field_validator('input_schema')
+    @field_validator("input_schema")
     @classmethod
     def validate_input_schema(cls, v: dict) -> dict:
         """Ensure input_schema has required fields."""
@@ -51,7 +51,7 @@ class ToolSpecSchema(BaseModel):
             v["properties"] = {}
         return v
 
-    @field_validator('dependencies')
+    @field_validator("dependencies")
     @classmethod
     def validate_dependencies(cls, v: list) -> list:
         """Clean up dependency names."""
@@ -59,7 +59,7 @@ class ToolSpecSchema(BaseModel):
         for dep in v:
             if isinstance(dep, str):
                 # Remove version specifiers for validation
-                dep_name = dep.split('>=')[0].split('==')[0].split('<')[0].strip()
+                dep_name = dep.split(">=")[0].split("==")[0].split("<")[0].strip()
                 if dep_name:
                     cleaned.append(dep_name)
         return cleaned
@@ -88,12 +88,12 @@ def extract_json_from_response(response: str) -> str:
 
     # Try to find JSON array or object
     # Look for array first (tool specs are typically an array)
-    array_match = re.search(r'\[[\s\S]*\]', response)
+    array_match = re.search(r"\[[\s\S]*\]", response)
     if array_match:
         return array_match.group()
 
     # Look for object
-    object_match = re.search(r'\{[\s\S]*\}', response)
+    object_match = re.search(r"\{[\s\S]*\}", response)
     if object_match:
         return object_match.group()
 
@@ -154,13 +154,15 @@ def parse_llm_tool_response(response: str, max_retries: int = 0) -> list[dict]:
     except json.JSONDecodeError as e:
         # Try to fix common JSON issues
         # Remove trailing commas
-        fixed = re.sub(r',(\s*[}\]])', r'\1', json_str)
+        fixed = re.sub(r",(\s*[}\]])", r"\1", json_str)
         # Try again
         try:
             data = json.loads(fixed)
         except json.JSONDecodeError:
             logger.error(f"Failed to parse JSON: {e}")
-            raise ValueError(f"Failed to parse tool specifications: {e}\nResponse: {response[:500]}...")
+            raise ValueError(
+                f"Failed to parse tool specifications: {e}\nResponse: {response[:500]}..."
+            )
 
     # Ensure we have a list
     if isinstance(data, dict):

@@ -409,8 +409,7 @@ class TestInputValidator:
         """Test string validation in chain."""
         validator = InputValidator()
         result = (
-            validator
-            .field("username", "john_doe")
+            validator.field("username", "john_doe")
             .required()
             .string(min_length=3, max_length=20)
             .validate()
@@ -421,8 +420,7 @@ class TestInputValidator:
         """Test integer validation in chain."""
         validator = InputValidator()
         result = (
-            validator
-            .field("age", "25")
+            validator.field("age", "25")
             .required()
             .integer(minimum=0, maximum=150)
             .validate()
@@ -434,11 +432,7 @@ class TestInputValidator:
         """Test number validation in chain."""
         validator = InputValidator()
         result = (
-            validator
-            .field("price", "19.99")
-            .required()
-            .number(minimum=0)
-            .validate()
+            validator.field("price", "19.99").required().number(minimum=0).validate()
         )
         assert result.is_valid
         assert result.value == 19.99
@@ -447,8 +441,7 @@ class TestInputValidator:
         """Test URL validation in chain."""
         validator = InputValidator()
         result = (
-            validator
-            .field("website", "https://example.com")
+            validator.field("website", "https://example.com")
             .required()
             .url()
             .validate()
@@ -459,11 +452,7 @@ class TestInputValidator:
         """Test email validation in chain."""
         validator = InputValidator()
         result = (
-            validator
-            .field("email", "user@example.com")
-            .required()
-            .email()
-            .validate()
+            validator.field("email", "user@example.com").required().email().validate()
         )
         assert result.is_valid
 
@@ -471,8 +460,7 @@ class TestInputValidator:
         """Test path validation in chain."""
         validator = InputValidator()
         result = (
-            validator
-            .field("file", "/home/user/file.txt")
+            validator.field("file", "/home/user/file.txt")
             .required()
             .path(must_be_absolute=True)
             .validate()
@@ -482,13 +470,7 @@ class TestInputValidator:
     def test_multiple_errors(self):
         """Test error accumulation doesn't occur after first error."""
         validator = InputValidator()
-        result = (
-            validator
-            .field("age", "abc")
-            .required()
-            .integer(minimum=0)
-            .validate()
-        )
+        result = validator.field("age", "abc").required().integer(minimum=0).validate()
         assert not result.is_valid
         # Should have error from integer validation
         assert "integer" in result.error

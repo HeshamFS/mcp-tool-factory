@@ -41,7 +41,7 @@ class OpenAIProvider(BaseLLMProvider):
         tokens_in = None
         tokens_out = None
 
-        if hasattr(response, 'usage'):
+        if hasattr(response, "usage"):
             tokens_in = response.usage.prompt_tokens
             tokens_out = response.usage.completion_tokens
 
@@ -49,18 +49,24 @@ class OpenAIProvider(BaseLLMProvider):
         raw_response = None
         try:
             raw_response = {
-                "id": response.id if hasattr(response, 'id') else None,
-                "model": response.model if hasattr(response, 'model') else None,
-                "created": response.created if hasattr(response, 'created') else None,
+                "id": response.id if hasattr(response, "id") else None,
+                "model": response.model if hasattr(response, "model") else None,
+                "created": response.created if hasattr(response, "created") else None,
                 "usage": {
                     "prompt_tokens": tokens_in,
                     "completion_tokens": tokens_out,
                     "total_tokens": (tokens_in or 0) + (tokens_out or 0),
                 },
-                "choices": [{
-                    "message": {"role": "assistant", "content": text},
-                    "finish_reason": response.choices[0].finish_reason if response.choices else None,
-                }],
+                "choices": [
+                    {
+                        "message": {"role": "assistant", "content": text},
+                        "finish_reason": (
+                            response.choices[0].finish_reason
+                            if response.choices
+                            else None
+                        ),
+                    }
+                ],
             }
         except Exception as e:
             logger.debug(f"Failed to capture response object: {e}")

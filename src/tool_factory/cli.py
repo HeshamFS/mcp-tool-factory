@@ -25,34 +25,40 @@ def cli() -> None:
 @cli.command()
 @click.argument("description")
 @click.option(
-    "--output", "-o",
+    "--output",
+    "-o",
     default="./servers",
     help="Output directory for generated files (default: ./servers)",
 )
 @click.option(
-    "--name", "-n",
+    "--name",
+    "-n",
     default="GeneratedToolServer",
     help="Name for the MCP server",
 )
 @click.option(
-    "--provider", "-p",
+    "--provider",
+    "-p",
     type=click.Choice(["claude_code", "anthropic", "openai", "google"]),
     default=None,
     help="LLM provider (auto-detects from env if not set)",
 )
 @click.option(
-    "--model", "-m",
+    "--model",
+    "-m",
     default=None,
     help="Model to use (uses provider default if not set)",
 )
 @click.option(
-    "--web-search", "-w",
+    "--web-search",
+    "-w",
     is_flag=True,
     default=False,
     help="Search the web for API docs and examples before generating",
 )
 @click.option(
-    "--auth", "-a",
+    "--auth",
+    "-a",
     multiple=True,
     help="Environment variable for API auth (e.g., --auth API_KEY --auth SECRET_TOKEN)",
 )
@@ -124,13 +130,18 @@ def generate(
 
     # Auto-create subdirectory with server name if using default servers directory
     output_path = Path(output)
-    if output == "./servers" or output.endswith("/servers") or output.endswith("\\servers"):
+    if (
+        output == "./servers"
+        or output.endswith("/servers")
+        or output.endswith("\\servers")
+    ):
         # Create subdirectory with lowercase server name
         server_dir_name = name.lower().replace(" ", "_").replace("-", "_")
         output_path = output_path / server_dir_name
 
     # Build production config
     from tool_factory.production import ProductionConfig
+
     production_config = ProductionConfig(
         enable_logging=enable_logging,
         enable_metrics=enable_metrics,
@@ -140,8 +151,12 @@ def generate(
     )
 
     # Build display info
-    web_search_status = "[green]enabled[/green]" if web_search else "[dim]disabled[/dim]"
-    health_check_status = "[green]enabled[/green]" if health_check else "[dim]disabled[/dim]"
+    web_search_status = (
+        "[green]enabled[/green]" if web_search else "[dim]disabled[/dim]"
+    )
+    health_check_status = (
+        "[green]enabled[/green]" if health_check else "[dim]disabled[/dim]"
+    )
     auth_status = f"[cyan]{', '.join(auth)}[/cyan]" if auth else "[dim]none[/dim]"
 
     # Production features status
@@ -154,20 +169,26 @@ def generate(
         prod_features.append(f"rate-limit({rate_limit}/min)")
     if enable_retries:
         prod_features.append("retries")
-    prod_status = f"[cyan]{', '.join(prod_features)}[/cyan]" if prod_features else "[dim]none[/dim]"
+    prod_status = (
+        f"[cyan]{', '.join(prod_features)}[/cyan]"
+        if prod_features
+        else "[dim]none[/dim]"
+    )
 
-    console.print(Panel(
-        f"[bold blue]MCP Tool Factory[/bold blue]\n\n"
-        f"Generating server: [green]{name}[/green]\n"
-        f"Provider: [cyan]{config.provider.value}[/cyan]\n"
-        f"Model: [cyan]{config.model}[/cyan]\n"
-        f"Web search: {web_search_status}\n"
-        f"Auth env vars: {auth_status}\n"
-        f"Health check: {health_check_status}\n"
-        f"Production: {prod_status}\n"
-        f"Output directory: [yellow]{output_path}[/yellow]",
-        title="Starting Generation",
-    ))
+    console.print(
+        Panel(
+            f"[bold blue]MCP Tool Factory[/bold blue]\n\n"
+            f"Generating server: [green]{name}[/green]\n"
+            f"Provider: [cyan]{config.provider.value}[/cyan]\n"
+            f"Model: [cyan]{config.model}[/cyan]\n"
+            f"Web search: {web_search_status}\n"
+            f"Auth env vars: {auth_status}\n"
+            f"Health check: {health_check_status}\n"
+            f"Production: {prod_status}\n"
+            f"Output directory: [yellow]{output_path}[/yellow]",
+            title="Starting Generation",
+        )
+    )
 
     with Progress(
         SpinnerColumn(),
@@ -212,17 +233,25 @@ def generate(
     ]
     # Add execution logs if available
     if result.execution_log:
-        files_list.append(f"  - {output_path}/EXECUTION_LOG.md [green](full execution trace)[/green]")
-        files_list.append(f"  - {output_path}/execution_log.json [dim](machine-readable)[/dim]")
+        files_list.append(
+            f"  - {output_path}/EXECUTION_LOG.md [green](full execution trace)[/green]"
+        )
+        files_list.append(
+            f"  - {output_path}/execution_log.json [dim](machine-readable)[/dim]"
+        )
 
-    console.print(Panel(
-        f"[bold green]Successfully generated MCP server![/bold green]\n\n"
-        f"[bold]Tools created:[/bold]\n" +
-        "\n".join(f"  - {spec.name}: {spec.description}" for spec in result.tool_specs) +
-        f"\n\n[bold]Files generated:[/bold]\n" +
-        "\n".join(files_list),
-        title="Generation Complete",
-    ))
+    console.print(
+        Panel(
+            f"[bold green]Successfully generated MCP server![/bold green]\n\n"
+            f"[bold]Tools created:[/bold]\n"
+            + "\n".join(
+                f"  - {spec.name}: {spec.description}" for spec in result.tool_specs
+            )
+            + f"\n\n[bold]Files generated:[/bold]\n"
+            + "\n".join(files_list),
+            title="Generation Complete",
+        )
+    )
 
     console.print()
     console.print("[bold]Next steps:[/bold]")
@@ -231,27 +260,34 @@ def generate(
     console.print("  3. python server.py")
     console.print()
     console.print("[dim]Or add to Claude Code config:[/dim]")
-    console.print(f'  {{"mcpServers": {{"{name.lower()}": {{"command": "python", "args": ["{output_path}/server.py"]}}}}}}')
+    console.print(
+        f'  {{"mcpServers": {{"{name.lower()}": {{"command": "python", "args": ["{output_path}/server.py"]}}}}}}'
+    )
 
 
 @cli.command()
 @click.argument("openapi_path", type=click.Path(exists=True))
 @click.option(
-    "--base-url", "-u",
+    "--base-url",
+    "-u",
     default=None,
     help="Base URL for the API (auto-detected from spec if not provided)",
 )
 @click.option(
-    "--output", "-o",
+    "--output",
+    "-o",
     default="./servers",
     help="Output directory for generated files (default: ./servers)",
 )
 @click.option(
-    "--name", "-n",
+    "--name",
+    "-n",
     default=None,
     help="Name for the MCP server (auto-generated from spec if not provided)",
 )
-def from_openapi(openapi_path: str, base_url: str | None, output: str, name: str | None) -> None:
+def from_openapi(
+    openapi_path: str, base_url: str | None, output: str, name: str | None
+) -> None:
     """Generate MCP server from OpenAPI specification.
 
     OPENAPI_PATH is the path to an OpenAPI spec file (JSON or YAML).
@@ -293,25 +329,35 @@ def from_openapi(openapi_path: str, base_url: str | None, output: str, name: str
     # Display detected info
     detected_url = servers[0]["url"] if servers else "not found"
     effective_url = base_url or detected_url
-    auth_type = auth_config.auth_type.value if auth_config.auth_type.value != "none" else "none detected"
+    auth_type = (
+        auth_config.auth_type.value
+        if auth_config.auth_type.value != "none"
+        else "none detected"
+    )
 
     # Auto-create subdirectory with server name
     output_path = Path(output)
-    if output == "./servers" or output.endswith("/servers") or output.endswith("\\servers"):
+    if (
+        output == "./servers"
+        or output.endswith("/servers")
+        or output.endswith("\\servers")
+    ):
         server_dir_name = name.lower().replace(" ", "_").replace("-", "_")
         output_path = output_path / server_dir_name
 
-    console.print(Panel(
-        f"[bold blue]MCP Tool Factory - OpenAPI[/bold blue]\n\n"
-        f"[bold]Spec:[/bold] [green]{openapi_path}[/green]\n"
-        f"[bold]API Title:[/bold] {info.get('title', 'Unknown')}\n"
-        f"[bold]API Version:[/bold] {info.get('version', 'Unknown')}\n"
-        f"[bold]Base URL:[/bold] [yellow]{effective_url}[/yellow]\n"
-        f"[bold]Auth Type:[/bold] [cyan]{auth_type}[/cyan]\n"
-        f"[bold]Server Name:[/bold] [green]{name}[/green]\n"
-        f"[bold]Output:[/bold] [yellow]{output_path}[/yellow]",
-        title="OpenAPI to MCP",
-    ))
+    console.print(
+        Panel(
+            f"[bold blue]MCP Tool Factory - OpenAPI[/bold blue]\n\n"
+            f"[bold]Spec:[/bold] [green]{openapi_path}[/green]\n"
+            f"[bold]API Title:[/bold] {info.get('title', 'Unknown')}\n"
+            f"[bold]API Version:[/bold] {info.get('version', 'Unknown')}\n"
+            f"[bold]Base URL:[/bold] [yellow]{effective_url}[/yellow]\n"
+            f"[bold]Auth Type:[/bold] [cyan]{auth_type}[/cyan]\n"
+            f"[bold]Server Name:[/bold] [green]{name}[/green]\n"
+            f"[bold]Output:[/bold] [yellow]{output_path}[/yellow]",
+            title="OpenAPI to MCP",
+        )
+    )
 
     with Progress(
         SpinnerColumn(),
@@ -324,6 +370,7 @@ def from_openapi(openapi_path: str, base_url: str | None, output: str, name: str
 
         progress.update(task, description="Generating MCP server code...")
         import asyncio
+
         result = asyncio.run(agent.generate_from_openapi(spec, base_url, name))
 
         progress.update(task, description="Writing files...")
@@ -333,14 +380,20 @@ def from_openapi(openapi_path: str, base_url: str | None, output: str, name: str
 
     # Show summary
     console.print()
-    console.print(Panel(
-        f"[bold green]Successfully generated MCP server![/bold green]\n\n"
-        f"[bold]Endpoints converted:[/bold] {len(result.tool_specs)}\n\n"
-        f"[bold]Tools:[/bold]\n" +
-        "\n".join(f"  - {spec.name}" for spec in result.tool_specs[:10]) +
-        (f"\n  ... and {len(result.tool_specs) - 10} more" if len(result.tool_specs) > 10 else ""),
-        title="Generation Complete",
-    ))
+    console.print(
+        Panel(
+            f"[bold green]Successfully generated MCP server![/bold green]\n\n"
+            f"[bold]Endpoints converted:[/bold] {len(result.tool_specs)}\n\n"
+            f"[bold]Tools:[/bold]\n"
+            + "\n".join(f"  - {spec.name}" for spec in result.tool_specs[:10])
+            + (
+                f"\n  ... and {len(result.tool_specs) - 10} more"
+                if len(result.tool_specs) > 10
+                else ""
+            ),
+            title="Generation Complete",
+        )
+    )
 
     console.print()
     console.print("[bold]Next steps:[/bold]")
@@ -357,28 +410,38 @@ def from_openapi(openapi_path: str, base_url: str | None, output: str, name: str
 @cli.command()
 @click.argument("database_path", type=click.Path(exists=True))
 @click.option(
-    "--type", "-t",
+    "--type",
+    "-t",
     "db_type",
     type=click.Choice(["sqlite", "postgresql"]),
     default="sqlite",
     help="Database type (default: sqlite)",
 )
 @click.option(
-    "--output", "-o",
+    "--output",
+    "-o",
     default="./servers",
     help="Output directory for generated files (default: ./servers)",
 )
 @click.option(
-    "--name", "-n",
+    "--name",
+    "-n",
     default=None,
     help="Name for the MCP server (auto-generated if not provided)",
 )
 @click.option(
-    "--tables", "-T",
+    "--tables",
+    "-T",
     multiple=True,
     help="Specific tables to include (default: all tables)",
 )
-def from_database(database_path: str, db_type: str, output: str, name: str | None, tables: tuple[str, ...]) -> None:
+def from_database(
+    database_path: str,
+    db_type: str,
+    output: str,
+    name: str | None,
+    tables: tuple[str, ...],
+) -> None:
     """Generate MCP server with CRUD tools from a database.
 
     DATABASE_PATH is the path to a SQLite database file, or a PostgreSQL connection string.
@@ -397,13 +460,19 @@ def from_database(database_path: str, db_type: str, output: str, name: str | Non
         mcp-factory from-database ./app.db --tables users --tables orders
         mcp-factory from-database "postgresql://user:pass@host/db" --type postgresql
     """
-    from tool_factory.database import DatabaseType, DatabaseIntrospector, DatabaseServerGenerator
+    from tool_factory.database import (
+        DatabaseType,
+        DatabaseIntrospector,
+        DatabaseServerGenerator,
+    )
     from tool_factory.generators.server import ServerGenerator
     from tool_factory.generators.docs import DocsGenerator
     from tool_factory.models import GeneratedServer
 
     # Parse database type
-    db_type_enum = DatabaseType.SQLITE if db_type == "sqlite" else DatabaseType.POSTGRESQL
+    db_type_enum = (
+        DatabaseType.SQLITE if db_type == "sqlite" else DatabaseType.POSTGRESQL
+    )
 
     # Auto-generate name from database file
     if not name:
@@ -416,18 +485,24 @@ def from_database(database_path: str, db_type: str, output: str, name: str | Non
 
     # Auto-create subdirectory
     output_path = Path(output)
-    if output == "./servers" or output.endswith("/servers") or output.endswith("\\servers"):
+    if (
+        output == "./servers"
+        or output.endswith("/servers")
+        or output.endswith("\\servers")
+    ):
         server_dir_name = name.lower().replace(" ", "_").replace("-", "_")
         output_path = output_path / server_dir_name
 
-    console.print(Panel(
-        f"[bold blue]MCP Tool Factory - Database[/bold blue]\n\n"
-        f"[bold]Database:[/bold] [green]{database_path}[/green]\n"
-        f"[bold]Type:[/bold] [cyan]{db_type}[/cyan]\n"
-        f"[bold]Server Name:[/bold] [green]{name}[/green]\n"
-        f"[bold]Output:[/bold] [yellow]{output_path}[/yellow]",
-        title="Database to MCP",
-    ))
+    console.print(
+        Panel(
+            f"[bold blue]MCP Tool Factory - Database[/bold blue]\n\n"
+            f"[bold]Database:[/bold] [green]{database_path}[/green]\n"
+            f"[bold]Type:[/bold] [cyan]{db_type}[/cyan]\n"
+            f"[bold]Server Name:[/bold] [green]{name}[/green]\n"
+            f"[bold]Output:[/bold] [yellow]{output_path}[/yellow]",
+            title="Database to MCP",
+        )
+    )
 
     with Progress(
         SpinnerColumn(),
@@ -451,10 +526,15 @@ def from_database(database_path: str, db_type: str, output: str, name: str | Non
             console.print("[bold red]No tables found in database![/bold red]")
             raise SystemExit(1)
 
-        progress.update(task, description=f"Found {len(filtered_tables)} tables, generating server...")
+        progress.update(
+            task,
+            description=f"Found {len(filtered_tables)} tables, generating server...",
+        )
 
         # Generate server
-        generator = DatabaseServerGenerator(db_type_enum, database_path, filtered_tables)
+        generator = DatabaseServerGenerator(
+            db_type_enum, database_path, filtered_tables
+        )
         server_code = generator.generate_server_code(name)
         tool_specs = generator.get_tool_specs()
         env_vars = generator.get_env_vars()
@@ -474,7 +554,9 @@ def from_database(database_path: str, db_type: str, output: str, name: str | Non
             readme=docs_gen.generate_readme(name, tool_specs),
             skill_file=docs_gen.generate_skill(name, tool_specs),
             pyproject_toml=server_gen.generate_pyproject(name, tool_specs),
-            github_actions=server_gen.generate_github_actions(name, tool_specs, env_vars),
+            github_actions=server_gen.generate_github_actions(
+                name, tool_specs, env_vars
+            ),
         )
 
         result.write_to_directory(str(output_path))
@@ -490,15 +572,19 @@ def from_database(database_path: str, db_type: str, output: str, name: str | Non
         tools = ["list"]
         if pk:
             tools = ["get", "list", "create", "update", "delete"]
-        tables_summary.append(f"  - {table.name} ({len(table.columns)} cols) → {', '.join(tools)}")
+        tables_summary.append(
+            f"  - {table.name} ({len(table.columns)} cols) → {', '.join(tools)}"
+        )
 
-    console.print(Panel(
-        f"[bold green]Successfully generated MCP server![/bold green]\n\n"
-        f"[bold]Tables:[/bold] {len(filtered_tables)}\n"
-        f"[bold]Tools generated:[/bold] {len(tool_specs)}\n\n"
-        + "\n".join(tables_summary),
-        title="Generation Complete",
-    ))
+    console.print(
+        Panel(
+            f"[bold green]Successfully generated MCP server![/bold green]\n\n"
+            f"[bold]Tables:[/bold] {len(filtered_tables)}\n"
+            f"[bold]Tools generated:[/bold] {len(tool_specs)}\n\n"
+            + "\n".join(tables_summary),
+            title="Generation Complete",
+        )
+    )
 
     console.print()
     console.print("[bold]Next steps:[/bold]")
@@ -544,13 +630,15 @@ def test(server_path: str) -> None:
 @cli.command()
 @click.argument("server_path", type=click.Path(exists=True))
 @click.option(
-    "--transport", "-t",
+    "--transport",
+    "-t",
     default="stdio",
     type=click.Choice(["stdio", "sse"]),
     help="MCP transport to use",
 )
 @click.option(
-    "--port", "-p",
+    "--port",
+    "-p",
     default=8000,
     help="Port for SSE transport",
 )
@@ -590,31 +678,33 @@ def serve(server_path: str, transport: str, port: int) -> None:
 @cli.command()
 def info() -> None:
     """Show information about MCP Tool Factory."""
-    console.print(Panel(
-        "[bold blue]MCP Tool Factory[/bold blue] v0.2.0\n\n"
-        "Generate universal MCP servers that work with:\n"
-        "  - Claude Code & Claude Desktop\n"
-        "  - OpenAI Agents SDK\n"
-        "  - Google ADK\n"
-        "  - LangChain & CrewAI\n"
-        "  - Any MCP-compatible client\n\n"
-        "[bold]Commands:[/bold]\n"
-        "  generate      Create MCP server from natural language\n"
-        "  from-openapi  Create MCP server from OpenAPI spec\n"
-        "  from-database Create MCP server with CRUD tools from database\n"
-        "  test          Run tests for generated server\n"
-        "  serve         Start MCP server for testing\n\n"
-        "[bold]Features:[/bold]\n"
-        "  - Multi-provider LLM support (Anthropic, OpenAI, Google)\n"
-        "  - Web search for API documentation\n"
-        "  - OpenAPI with auth (API Key, Bearer, OAuth2)\n"
-        "  - Database CRUD (SQLite, PostgreSQL)\n"
-        "  - Health check endpoints\n"
-        "  - GitHub Actions CI/CD\n"
-        "  - Full execution logging\n\n"
-        "[dim]https://github.com/hisham-maged/mcp-tool-factory[/dim]",
-        title="About",
-    ))
+    console.print(
+        Panel(
+            "[bold blue]MCP Tool Factory[/bold blue] v0.2.0\n\n"
+            "Generate universal MCP servers that work with:\n"
+            "  - Claude Code & Claude Desktop\n"
+            "  - OpenAI Agents SDK\n"
+            "  - Google ADK\n"
+            "  - LangChain & CrewAI\n"
+            "  - Any MCP-compatible client\n\n"
+            "[bold]Commands:[/bold]\n"
+            "  generate      Create MCP server from natural language\n"
+            "  from-openapi  Create MCP server from OpenAPI spec\n"
+            "  from-database Create MCP server with CRUD tools from database\n"
+            "  test          Run tests for generated server\n"
+            "  serve         Start MCP server for testing\n\n"
+            "[bold]Features:[/bold]\n"
+            "  - Multi-provider LLM support (Anthropic, OpenAI, Google)\n"
+            "  - Web search for API documentation\n"
+            "  - OpenAPI with auth (API Key, Bearer, OAuth2)\n"
+            "  - Database CRUD (SQLite, PostgreSQL)\n"
+            "  - Health check endpoints\n"
+            "  - GitHub Actions CI/CD\n"
+            "  - Full execution logging\n\n"
+            "[dim]https://github.com/hisham-maged/mcp-tool-factory[/dim]",
+            title="About",
+        )
+    )
 
 
 if __name__ == "__main__":

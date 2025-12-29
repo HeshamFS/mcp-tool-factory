@@ -25,21 +25,39 @@ class DocsGenerator:
         all_text = " ".join(tool_descriptions)
 
         # Detect common domains
-        if any(word in all_text for word in ["weather", "temperature", "forecast", "climate"]):
+        if any(
+            word in all_text
+            for word in ["weather", "temperature", "forecast", "climate"]
+        ):
             return "Weather and climate data tools for AI agents"
-        elif any(word in all_text for word in ["database", "sql", "query", "crud", "table"]):
+        elif any(
+            word in all_text for word in ["database", "sql", "query", "crud", "table"]
+        ):
             return "Database operations and CRUD tools for AI agents"
-        elif any(word in all_text for word in ["github", "repository", "commit", "pull request", "issue"]):
+        elif any(
+            word in all_text
+            for word in ["github", "repository", "commit", "pull request", "issue"]
+        ):
             return "GitHub integration tools for AI agents"
-        elif any(word in all_text for word in ["iot", "device", "sensor", "thing", "ditto", "twin"]):
+        elif any(
+            word in all_text
+            for word in ["iot", "device", "sensor", "thing", "ditto", "twin"]
+        ):
             return "IoT device management tools for AI agents"
         elif any(word in all_text for word in ["api", "rest", "http", "endpoint"]):
             return "REST API integration tools for AI agents"
-        elif any(word in all_text for word in ["file", "document", "read", "write", "storage"]):
+        elif any(
+            word in all_text
+            for word in ["file", "document", "read", "write", "storage"]
+        ):
             return "File and document management tools for AI agents"
-        elif any(word in all_text for word in ["email", "message", "notification", "send"]):
+        elif any(
+            word in all_text for word in ["email", "message", "notification", "send"]
+        ):
             return "Communication and messaging tools for AI agents"
-        elif any(word in all_text for word in ["payment", "stripe", "transaction", "billing"]):
+        elif any(
+            word in all_text for word in ["payment", "stripe", "transaction", "billing"]
+        ):
             return "Payment processing tools for AI agents"
         elif any(word in all_text for word in ["search", "find", "query", "lookup"]):
             return "Search and discovery tools for AI agents"
@@ -61,7 +79,10 @@ class DocsGenerator:
         if len(tool_specs) > 5:
             tools_list += f", and {len(tool_specs) - 5} more"
 
-        base_desc = description or f"An MCP server providing {tool_count} tools for various operations."
+        base_desc = (
+            description
+            or f"An MCP server providing {tool_count} tools for various operations."
+        )
 
         overview = f"""An MCP (Model Context Protocol) server that enables AI agents to perform specialized operations through a standardized interface.
 
@@ -114,18 +135,20 @@ class DocsGenerator:
         for i, name in enumerate(tool_names):
             parts.append(f"        T{i}[{name}]")
 
-        parts.extend([
-            "    end",
-            "",
-            '    subgraph Output["Results"]',
-            "        R[Structured Data / Actions]",
-            "    end",
-            "",
-            "    Agents --> Server",
-            "    Server --> Output",
-            "```",
-            "",
-        ])
+        parts.extend(
+            [
+                "    end",
+                "",
+                '    subgraph Output["Results"]',
+                "        R[Structured Data / Actions]",
+                "    end",
+                "",
+                "    Agents --> Server",
+                "    Server --> Output",
+                "```",
+                "",
+            ]
+        )
 
         return parts
 
@@ -178,7 +201,9 @@ class DocsGenerator:
 
         # Generate rich content
         tagline = self._generate_overview_tagline(server_name, tool_specs, description)
-        overview = self._generate_overview_description(server_name, tool_specs, description)
+        overview = self._generate_overview_description(
+            server_name, tool_specs, description
+        )
 
         parts = [
             f"# {server_name}",
@@ -203,54 +228,60 @@ class DocsGenerator:
         parts.extend(self._generate_tools_summary_table(tool_specs))
 
         # Quick Start section
-        parts.extend([
-            "---",
-            "",
-            "## Quick Start",
-            "",
-            "```bash",
-            "# Install dependencies",
-            "pip install -e .",
-            "",
-            "# Run the server",
-            "python server.py",
-            "```",
-            "",
-        ])
+        parts.extend(
+            [
+                "---",
+                "",
+                "## Quick Start",
+                "",
+                "```bash",
+                "# Install dependencies",
+                "pip install -e .",
+                "",
+                "# Run the server",
+                "python server.py",
+                "```",
+                "",
+            ]
+        )
 
         # Environment variables section
         if auth_env_vars:
-            parts.extend([
-                "## Environment Variables",
-                "",
-                "Create a `.env` file or set these environment variables:",
-                "",
-                "```bash",
-            ])
+            parts.extend(
+                [
+                    "## Environment Variables",
+                    "",
+                    "Create a `.env` file or set these environment variables:",
+                    "",
+                    "```bash",
+                ]
+            )
             for var in auth_env_vars:
                 parts.append(f"export {var}=your-api-key-here")
             parts.extend(["```", ""])
 
-        parts.extend([
-            "## Installation",
-            "",
-            "```bash",
-            "pip install -e .",
-            "```",
-            "",
-            "## Usage",
-            "",
-            "### With Claude Code / Claude Desktop",
-            "",
-            "Add to your `.claude/mcp.json`:",
-            "",
-            "```json",
-            "{",
-            '  "mcpServers": {',
-            f'    "{server_slug}": {{',
-            '      "command": "python",',
-            '      "args": ["./server.py"]',
-        ])
+        parts.extend(
+            [
+                "## Installation",
+                "",
+                "```bash",
+                "pip install -e .",
+                "```",
+                "",
+                "## Usage",
+                "",
+                "### With Claude Code / Claude Desktop",
+                "",
+                "Add to your `.claude/mcp.json`:",
+                "",
+                "```json",
+                "{",
+                '  "mcpServers": {',
+                f'    "{server_slug}": {{',
+                '      "command": "python",',
+                '      "args": ["./server.py"]',
+            ]
+        )
 
         # Add env vars to Claude config if present
         if auth_env_vars:
@@ -260,22 +291,24 @@ class DocsGenerator:
                 parts.append(f'        "{var}": "${{env:{var}}}"{comma}')
             parts.append("      }")
 
-        parts.extend([
-            "    }",
-            "  }",
-            "}",
-            "```",
-            "",
-            "### With OpenAI Agents SDK",
-            "",
-            "```python",
-            "from agents import Agent",
-            "from agents.mcp import MCPServerStdio",
-            "",
-            "async with MCPServerStdio(",
-            '    command="python",',
-            '    args=["./server.py"],',
-        ])
+        parts.extend(
+            [
+                "    }",
+                "  }",
+                "}",
+                "```",
+                "",
+                "### With OpenAI Agents SDK",
+                "",
+                "```python",
+                "from agents import Agent",
+                "from agents.mcp import MCPServerStdio",
+                "",
+                "async with MCPServerStdio(",
+                '    command="python",',
+                '    args=["./server.py"],',
+            ]
+        )
 
         if auth_env_vars:
             parts.append("    env={")
@@ -283,34 +316,36 @@ class DocsGenerator:
                 parts.append(f'        "{var}": os.environ["{var}"],')
             parts.append("    },")
 
-        parts.extend([
-            ") as mcp_server:",
-            "    agent = Agent(",
-            f'        name="{server_name}",',
-            "        mcp_servers=[mcp_server]",
-            "    )",
-            "```",
-            "",
-            "### With LangChain",
-            "",
-            "```python",
-            "from langchain_mcp_adapters import load_mcp_tools",
-            "",
-            "tools = await load_mcp_tools(",
-            '    command="python",',
-            '    args=["./server.py"]',
-            ")",
-            "agent = create_react_agent(llm, tools)",
-            "```",
-            "",
-            "### With Docker",
-            "",
-            "```bash",
-            "# Build",
-            f"docker build -t {server_slug} .",
-            "",
-            "# Run",
-        ])
+        parts.extend(
+            [
+                ") as mcp_server:",
+                "    agent = Agent(",
+                f'        name="{server_name}",',
+                "        mcp_servers=[mcp_server]",
+                "    )",
+                "```",
+                "",
+                "### With LangChain",
+                "",
+                "```python",
+                "from langchain_mcp_adapters import load_mcp_tools",
+                "",
+                "tools = await load_mcp_tools(",
+                '    command="python",',
+                '    args=["./server.py"]',
+                ")",
+                "agent = create_react_agent(llm, tools)",
+                "```",
+                "",
+                "### With Docker",
+                "",
+                "```bash",
+                "# Build",
+                f"docker build -t {server_slug} .",
+                "",
+                "# Run",
+            ]
+        )
 
         if auth_env_vars:
             env_flags = " ".join([f"-e {var}" for var in auth_env_vars])
@@ -318,14 +353,16 @@ class DocsGenerator:
         else:
             parts.append(f"docker run {server_slug}")
 
-        parts.extend([
-            "```",
-            "",
-            "---",
-            "",
-            "## Tool Reference",
-            "",
-        ])
+        parts.extend(
+            [
+                "```",
+                "",
+                "---",
+                "",
+                "## Tool Reference",
+                "",
+            ]
+        )
 
         # Add tool documentation
         for spec in tool_specs:
@@ -345,14 +382,18 @@ class DocsGenerator:
                     param_desc = param_schema.get("description", "")
                     required = param_name in spec.input_schema.get("required", [])
                     req_str = "Yes" if required else "No"
-                    parts.append(f"| `{param_name}` | {param_type} | {req_str} | {param_desc} |")
+                    parts.append(
+                        f"| `{param_name}` | {param_type} | {req_str} | {param_desc} |"
+                    )
                 parts.append("")
 
             # Output
             if spec.output_schema and spec.output_schema.get("properties"):
                 parts.append("**Returns:**")
                 parts.append("")
-                for field_name, field_schema in spec.output_schema["properties"].items():
+                for field_name, field_schema in spec.output_schema[
+                    "properties"
+                ].items():
                     field_type = field_schema.get("type", "any")
                     field_desc = field_schema.get("description", "")
                     parts.append(f"- `{field_name}` ({field_type}): {field_desc}")
@@ -389,20 +430,22 @@ class DocsGenerator:
             parts.append("")
 
         # Add testing section
-        parts.extend([
-            "## Testing",
-            "",
-            "```bash",
-            "pytest tests/",
-            "```",
-            "",
-            "---",
-            "",
-            "## License",
-            "",
-            "MIT",
-            "",
-        ])
+        parts.extend(
+            [
+                "## Testing",
+                "",
+                "```bash",
+                "pytest tests/",
+                "```",
+                "",
+                "---",
+                "",
+                "## License",
+                "",
+                "MIT",
+                "",
+            ]
+        )
 
         return "\n".join(parts)
 
@@ -454,22 +497,24 @@ class DocsGenerator:
             parts.append("")
 
         # Setup instructions
-        parts.extend([
-            "## Setup",
-            "",
-            "Add to your Claude Code MCP configuration:",
-            "",
-            "```json",
-            "{",
-            '  "mcpServers": {',
-            f'    "{server_name.lower().replace(" ", "-")}": {{',
-            '      "command": "python",',
-            '      "args": ["path/to/server.py"]',
-            "    }",
-            "  }",
-            "}",
-            "```",
-            "",
-        ])
+        parts.extend(
+            [
+                "## Setup",
+                "",
+                "Add to your Claude Code MCP configuration:",
+                "",
+                "```json",
+                "{",
+                '  "mcpServers": {',
+                f'    "{server_name.lower().replace(" ", "-")}": {{',
+                '      "command": "python",',
+                '      "args": ["path/to/server.py"]',
+                "    }",
+                "  }",
+                "}",
+                "```",
+                "",
+            ]
+        )
 
         return "\n".join(parts)

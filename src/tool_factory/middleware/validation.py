@@ -38,6 +38,7 @@ class ValidationError(Exception):
 
 class ValidationType(Enum):
     """Types of validation to perform."""
+
     REQUEST = "request"
     RESPONSE = "response"
     BOTH = "both"
@@ -113,7 +114,9 @@ class SchemaValidator:
         for prop_name, prop_schema in properties.items():
             if prop_name in value:
                 prop_validator = SchemaValidator(prop_schema, self.coerce_types)
-                is_valid, coerced_val, prop_errors = prop_validator.validate(value[prop_name])
+                is_valid, coerced_val, prop_errors = prop_validator.validate(
+                    value[prop_name]
+                )
                 if not is_valid:
                     errors.extend([f"{prop_name}: {e}" for e in prop_errors])
                 else:
@@ -169,7 +172,9 @@ class SchemaValidator:
             if self.coerce_types and value is not None:
                 value = str(value)
             elif value is None:
-                return None, [] if not self.schema.get("required") else ["Value cannot be null"]
+                return None, (
+                    [] if not self.schema.get("required") else ["Value cannot be null"]
+                )
             else:
                 return value, ["Expected string type"]
 
@@ -186,6 +191,7 @@ class SchemaValidator:
 
         if pattern:
             import re
+
             if not re.match(pattern, value):
                 errors.append(f"String does not match pattern: {pattern}")
 
@@ -232,6 +238,7 @@ class SchemaValidator:
 
         # Check for NaN/Infinity
         import math
+
         if math.isnan(value) or math.isinf(value):
             errors.append("Value must be finite")
 
@@ -363,13 +370,13 @@ class ResponseValidator:
             return True, []
 
         schema = self.schemas[tool_name]
-        validator = SchemaValidator(schema, coerce_types=False)  # Don't coerce responses
+        validator = SchemaValidator(
+            schema, coerce_types=False
+        )  # Don't coerce responses
         is_valid, _, errors = validator.validate(response)
 
         if not is_valid and self.log_warnings:
-            logger.warning(
-                f"Response validation failed for {tool_name}: {errors}"
-            )
+            logger.warning(f"Response validation failed for {tool_name}: {errors}")
 
         return is_valid, errors
 
@@ -414,10 +421,14 @@ class ValidationMiddleware:
         Returns:
             Decorator function
         """
+
         def decorator(func: Callable) -> Callable:
             def wrapper(*args, **kwargs) -> Any:
                 # Validate request
-                if self.validation_type in (ValidationType.REQUEST, ValidationType.BOTH):
+                if self.validation_type in (
+                    ValidationType.REQUEST,
+                    ValidationType.BOTH,
+                ):
                     is_valid, coerced, errors = self.request_validator.validate(
                         tool_name, kwargs
                     )
@@ -427,7 +438,9 @@ class ValidationMiddleware:
                                 f"Request validation failed for {tool_name}",
                                 errors=[{"error": e} for e in errors],
                             )
-                        logger.warning(f"Request validation errors for {tool_name}: {errors}")
+                        logger.warning(
+                            f"Request validation errors for {tool_name}: {errors}"
+                        )
                     else:
                         kwargs = coerced
 
@@ -435,8 +448,13 @@ class ValidationMiddleware:
                 result = func(*args, **kwargs)
 
                 # Validate response
-                if self.validation_type in (ValidationType.RESPONSE, ValidationType.BOTH):
-                    is_valid, errors = self.response_validator.validate(tool_name, result)
+                if self.validation_type in (
+                    ValidationType.RESPONSE,
+                    ValidationType.BOTH,
+                ):
+                    is_valid, errors = self.response_validator.validate(
+                        tool_name, result
+                    )
                     if not is_valid and self.raise_on_response_error:
                         raise ValidationError(
                             f"Response validation failed for {tool_name}",
@@ -444,7 +462,9 @@ class ValidationMiddleware:
                         )
 
                 return result
+
             return wrapper
+
         return decorator
 
     @classmethod
@@ -518,7 +538,8 @@ def generate_validation_middleware_code(tool_specs: list[dict[str, Any]]) -> str
     Returns:
         Python code string for validation middleware
     """
-    code_parts = ['''
+    code_parts = [
+        '''
 # ============== REQUEST/RESPONSE VALIDATION ==============
 
 from dataclasses import dataclass, field
@@ -637,7 +658,8 @@ def validate_schema(value: Any, schema: dict, coerce: bool = True) -> tuple[bool
 
 # Tool input schemas for validation
 TOOL_SCHEMAS: dict[str, dict] = {
-''']
+'''
+    ]
 
     # Add schemas for each tool
     for tool in tool_specs:
@@ -645,7 +667,8 @@ TOOL_SCHEMAS: dict[str, dict] = {
         input_schema = tool.get("input_schema", tool.get("inputSchema", {}))
         code_parts.append(f'    "{tool_name}": {repr(input_schema)},')
 
-    code_parts.append('''}
+    code_parts.append(
+        '''}
 
 
 def validate_tool_input(tool_name: str, arguments: dict) -> dict:
@@ -684,6 +707,7 @@ def with_validation(tool_name: str):
         return wrapper
     return decorator
 
-''')
+'''
+    )
 
     return "\n".join(code_parts)

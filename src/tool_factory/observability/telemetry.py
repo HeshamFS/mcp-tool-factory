@@ -11,11 +11,12 @@ from typing import Any
 
 class TelemetryExporter(Enum):
     """Supported telemetry exporters."""
+
     CONSOLE = "console"  # Debug output to console
-    OTLP = "otlp"        # OpenTelemetry Protocol (default)
-    JAEGER = "jaeger"    # Jaeger backend
-    ZIPKIN = "zipkin"    # Zipkin backend
-    AZURE = "azure"      # Azure Application Insights
+    OTLP = "otlp"  # OpenTelemetry Protocol (default)
+    JAEGER = "jaeger"  # Jaeger backend
+    ZIPKIN = "zipkin"  # Zipkin backend
+    AZURE = "azure"  # Azure Application Insights
 
 
 @dataclass
@@ -66,42 +67,62 @@ class TelemetryCodeGenerator:
         ]
 
         if self.config.enable_tracing:
-            imports.extend([
-                "from opentelemetry import trace",
-                "from opentelemetry.sdk.trace import TracerProvider",
-                "from opentelemetry.sdk.trace.export import BatchSpanProcessor",
-                "from opentelemetry.sdk.resources import Resource, SERVICE_NAME, SERVICE_VERSION",
-                "from opentelemetry.trace import Status, StatusCode",
-            ])
+            imports.extend(
+                [
+                    "from opentelemetry import trace",
+                    "from opentelemetry.sdk.trace import TracerProvider",
+                    "from opentelemetry.sdk.trace.export import BatchSpanProcessor",
+                    "from opentelemetry.sdk.resources import Resource, SERVICE_NAME, SERVICE_VERSION",
+                    "from opentelemetry.trace import Status, StatusCode",
+                ]
+            )
 
             # Exporter-specific imports
             if self.config.exporter == TelemetryExporter.OTLP:
-                imports.append("from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter")
+                imports.append(
+                    "from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter"
+                )
             elif self.config.exporter == TelemetryExporter.JAEGER:
-                imports.append("from opentelemetry.exporter.jaeger.thrift import JaegerExporter")
+                imports.append(
+                    "from opentelemetry.exporter.jaeger.thrift import JaegerExporter"
+                )
             elif self.config.exporter == TelemetryExporter.ZIPKIN:
-                imports.append("from opentelemetry.exporter.zipkin.json import ZipkinExporter")
+                imports.append(
+                    "from opentelemetry.exporter.zipkin.json import ZipkinExporter"
+                )
             elif self.config.exporter == TelemetryExporter.AZURE:
-                imports.append("from azure.monitor.opentelemetry.exporter import AzureMonitorTraceExporter")
+                imports.append(
+                    "from azure.monitor.opentelemetry.exporter import AzureMonitorTraceExporter"
+                )
             elif self.config.exporter == TelemetryExporter.CONSOLE:
-                imports.append("from opentelemetry.sdk.trace.export import ConsoleSpanExporter")
+                imports.append(
+                    "from opentelemetry.sdk.trace.export import ConsoleSpanExporter"
+                )
 
         if self.config.enable_metrics:
-            imports.extend([
-                "from opentelemetry import metrics",
-                "from opentelemetry.sdk.metrics import MeterProvider",
-                "from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader",
-            ])
+            imports.extend(
+                [
+                    "from opentelemetry import metrics",
+                    "from opentelemetry.sdk.metrics import MeterProvider",
+                    "from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader",
+                ]
+            )
 
             if self.config.exporter == TelemetryExporter.OTLP:
-                imports.append("from opentelemetry.exporter.otlp.proto.grpc.metric_exporter import OTLPMetricExporter")
+                imports.append(
+                    "from opentelemetry.exporter.otlp.proto.grpc.metric_exporter import OTLPMetricExporter"
+                )
             elif self.config.exporter == TelemetryExporter.CONSOLE:
-                imports.append("from opentelemetry.sdk.metrics.export import ConsoleMetricExporter")
+                imports.append(
+                    "from opentelemetry.sdk.metrics.export import ConsoleMetricExporter"
+                )
 
         if self.config.enable_log_correlation:
-            imports.extend([
-                "from opentelemetry.instrumentation.logging import LoggingInstrumentor",
-            ])
+            imports.extend(
+                [
+                    "from opentelemetry.instrumentation.logging import LoggingInstrumentor",
+                ]
+            )
 
         return "\n".join(imports)
 
@@ -145,12 +166,12 @@ def setup_telemetry():
 
         # Log correlation
         if self.config.enable_log_correlation:
-            code += '''
+            code += """
     # Enable log correlation with trace context
     LoggingInstrumentor().instrument()
-'''
+"""
 
-        code += '''
+        code += """
     logger = logging.getLogger("mcp_server.telemetry")
     logger.info("OpenTelemetry instrumentation initialized")
 
@@ -158,7 +179,7 @@ def setup_telemetry():
 # Initialize telemetry on module load
 setup_telemetry()
 
-'''
+"""
         return code
 
     def _generate_tracing_setup(self) -> str:
@@ -168,23 +189,23 @@ setup_telemetry()
 
         # Exporter configuration
         if self.config.exporter == TelemetryExporter.OTLP:
-            code += f'''    exporter = OTLPSpanExporter(endpoint="{self.config.endpoint}")
-'''
+            code += f"""    exporter = OTLPSpanExporter(endpoint="{self.config.endpoint}")
+"""
         elif self.config.exporter == TelemetryExporter.JAEGER:
             # Parse endpoint for Jaeger
-            code += f'''    exporter = JaegerExporter(
+            code += f"""    exporter = JaegerExporter(
         agent_host_name="{self.config.endpoint.split('://')[1].split(':')[0]}",
         agent_port=6831,
     )
-'''
+"""
         elif self.config.exporter == TelemetryExporter.ZIPKIN:
-            code += f'''    exporter = ZipkinExporter(endpoint="{self.config.endpoint}/api/v2/spans")
-'''
+            code += f"""    exporter = ZipkinExporter(endpoint="{self.config.endpoint}/api/v2/spans")
+"""
         elif self.config.exporter == TelemetryExporter.AZURE:
-            code += f'''    exporter = AzureMonitorTraceExporter(
+            code += f"""    exporter = AzureMonitorTraceExporter(
         connection_string="{self.config.azure_connection_string or ''}"
     )
-'''
+"""
         elif self.config.exporter == TelemetryExporter.CONSOLE:
             code += "    exporter = ConsoleSpanExporter()\n"
 
@@ -198,14 +219,14 @@ setup_telemetry()
         code = "\n    # Setup metrics\n"
 
         if self.config.exporter == TelemetryExporter.OTLP:
-            code += f'''    metric_exporter = OTLPMetricExporter(endpoint="{self.config.endpoint}")
-'''
+            code += f"""    metric_exporter = OTLPMetricExporter(endpoint="{self.config.endpoint}")
+"""
         elif self.config.exporter == TelemetryExporter.CONSOLE:
             code += "    metric_exporter = ConsoleMetricExporter()\n"
         else:
             # Use OTLP as fallback for other exporters
-            code += f'''    metric_exporter = OTLPMetricExporter(endpoint="{self.config.endpoint}")
-'''
+            code += f"""    metric_exporter = OTLPMetricExporter(endpoint="{self.config.endpoint}")
+"""
 
         code += """    metric_reader = PeriodicExportingMetricReader(metric_exporter)
     meter_provider = MeterProvider(resource=resource, metric_readers=[metric_reader])

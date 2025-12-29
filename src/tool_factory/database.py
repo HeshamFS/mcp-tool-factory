@@ -22,6 +22,7 @@ from tool_factory.models import ToolSpec
 
 class DatabaseType(Enum):
     """Supported database types."""
+
     SQLITE = "sqlite"
     POSTGRESQL = "postgresql"
 
@@ -29,6 +30,7 @@ class DatabaseType(Enum):
 @dataclass
 class ColumnInfo:
     """Information about a database column."""
+
     name: str
     data_type: str
     is_nullable: bool = True
@@ -42,7 +44,9 @@ class ColumnInfo:
 
         if any(t in type_lower for t in ["int", "serial", "bigint", "smallint"]):
             return "int"
-        elif any(t in type_lower for t in ["real", "double", "float", "decimal", "numeric"]):
+        elif any(
+            t in type_lower for t in ["real", "double", "float", "decimal", "numeric"]
+        ):
             return "float"
         elif any(t in type_lower for t in ["bool"]):
             return "bool"
@@ -70,6 +74,7 @@ class ColumnInfo:
 @dataclass
 class TableInfo:
     """Information about a database table."""
+
     name: str
     columns: list[ColumnInfo] = field(default_factory=list)
     schema: str = "public"
@@ -113,11 +118,13 @@ class DatabaseIntrospector:
         tables = []
 
         # Get all table names
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT name FROM sqlite_master
             WHERE type='table' AND name NOT LIKE 'sqlite_%'
             ORDER BY name
-        """)
+        """
+        )
         table_names = [row[0] for row in cursor.fetchall()]
 
         for table_name in table_names:
@@ -126,13 +133,15 @@ class DatabaseIntrospector:
             columns = []
             for row in cursor.fetchall():
                 # row: (cid, name, type, notnull, dflt_value, pk)
-                columns.append(ColumnInfo(
-                    name=row[1],
-                    data_type=row[2],
-                    is_nullable=not bool(row[3]),
-                    is_primary_key=bool(row[5]),
-                    default_value=row[4],
-                ))
+                columns.append(
+                    ColumnInfo(
+                        name=row[1],
+                        data_type=row[2],
+                        is_nullable=not bool(row[3]),
+                        is_primary_key=bool(row[5]),
+                        default_value=row[4],
+                    )
+                )
 
             # Get foreign keys
             cursor.execute(f"PRAGMA foreign_key_list({table_name})")
@@ -155,7 +164,9 @@ class DatabaseIntrospector:
         try:
             import psycopg2
         except ImportError:
-            raise ImportError("psycopg2 is required for PostgreSQL support. Install with: pip install psycopg2-binary")
+            raise ImportError(
+                "psycopg2 is required for PostgreSQL support. Install with: pip install psycopg2-binary"
+            )
 
         conn = psycopg2.connect(self.connection_string)
         cursor = conn.cursor()
@@ -163,17 +174,20 @@ class DatabaseIntrospector:
         tables = []
 
         # Get all tables in public schema
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT table_name
             FROM information_schema.tables
             WHERE table_schema = 'public' AND table_type = 'BASE TABLE'
             ORDER BY table_name
-        """)
+        """
+        )
         table_names = [row[0] for row in cursor.fetchall()]
 
         for table_name in table_names:
             # Get column info
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT
                     c.column_name,
                     c.data_type,
@@ -190,20 +204,25 @@ class DatabaseIntrospector:
                 ) pk ON c.column_name = pk.column_name
                 WHERE c.table_name = %s AND c.table_schema = 'public'
                 ORDER BY c.ordinal_position
-            """, (table_name, table_name))
+            """,
+                (table_name, table_name),
+            )
 
             columns = []
             for row in cursor.fetchall():
-                columns.append(ColumnInfo(
-                    name=row[0],
-                    data_type=row[1],
-                    is_nullable=row[2] == 'YES',
-                    default_value=row[3],
-                    is_primary_key=row[4],
-                ))
+                columns.append(
+                    ColumnInfo(
+                        name=row[0],
+                        data_type=row[1],
+                        is_nullable=row[2] == "YES",
+                        default_value=row[3],
+                        is_primary_key=row[4],
+                    )
+                )
 
             # Get foreign keys
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT
                     kcu.column_name,
                     ccu.table_name AS foreign_table,
@@ -214,7 +233,9 @@ class DatabaseIntrospector:
                 JOIN information_schema.constraint_column_usage ccu
                     ON tc.constraint_name = ccu.constraint_name
                 WHERE tc.table_name = %s AND tc.constraint_type = 'FOREIGN KEY'
-            """, (table_name,))
+            """,
+                (table_name,),
+            )
 
             for fk_row in cursor.fetchall():
                 for col in columns:
@@ -385,7 +406,9 @@ def health_check() -> dict:
 
         return tools
 
-    def _generate_get_tool(self, table: TableInfo, safe_name: str, pk: ColumnInfo) -> str:
+    def _generate_get_tool(
+        self, table: TableInfo, safe_name: str, pk: ColumnInfo
+    ) -> str:
         """Generate get by ID tool."""
         pk_type = pk.to_python_type()
         placeholder = "?" if self.db_type == DatabaseType.SQLITE else "%s"
@@ -434,15 +457,15 @@ def get_{safe_name}({pk.name}: {pk_type}) -> dict:
 
             if self.db_type == DatabaseType.SQLITE:
                 filter_conditions.append(
-                    f'        if {col.name} is not None:\n'
+                    f"        if {col.name} is not None:\n"
                     f'            conditions.append("{col.name} = ?")\n'
-                    f'            params.append({col.name})'
+                    f"            params.append({col.name})"
                 )
             else:
                 filter_conditions.append(
-                    f'        if {col.name} is not None:\n'
+                    f"        if {col.name} is not None:\n"
                     f'            conditions.append("{col.name} = %s")\n'
-                    f'            params.append({col.name})'
+                    f"            params.append({col.name})"
                 )
 
         params_str = ", ".join(filter_params)
@@ -558,7 +581,9 @@ def create_{safe_name}({params_str}) -> dict:
 
 '''
 
-    def _generate_update_tool(self, table: TableInfo, safe_name: str, pk: ColumnInfo) -> str:
+    def _generate_update_tool(
+        self, table: TableInfo, safe_name: str, pk: ColumnInfo
+    ) -> str:
         """Generate update tool."""
         # Update non-PK columns
         update_cols = [col for col in table.columns if not col.is_primary_key]
@@ -574,9 +599,9 @@ def create_{safe_name}({params_str}) -> dict:
 
             placeholder = "?" if self.db_type == DatabaseType.SQLITE else "%s"
             set_clauses.append(
-                f'        if {col.name} is not None:\n'
+                f"        if {col.name} is not None:\n"
                 f'            updates.append("{col.name} = {placeholder}")\n'
-                f'            params.append({col.name})'
+                f"            params.append({col.name})"
             )
 
         params_str = ", ".join(params)
@@ -623,7 +648,9 @@ def update_{safe_name}({params_str}) -> dict:
 
 '''
 
-    def _generate_delete_tool(self, table: TableInfo, safe_name: str, pk: ColumnInfo) -> str:
+    def _generate_delete_tool(
+        self, table: TableInfo, safe_name: str, pk: ColumnInfo
+    ) -> str:
         """Generate delete tool."""
         pk_type = pk.to_python_type()
         placeholder = "?" if self.db_type == DatabaseType.SQLITE else "%s"
@@ -660,7 +687,7 @@ def delete_{safe_name}({pk.name}: {pk_type}) -> dict:
     def _safe_name(self, name: str) -> str:
         """Convert table name to safe Python identifier."""
         # Replace non-alphanumeric with underscore
-        safe = re.sub(r'[^a-zA-Z0-9]', '_', name)
+        safe = re.sub(r"[^a-zA-Z0-9]", "_", name)
         # Ensure starts with letter
         if safe and safe[0].isdigit():
             safe = f"t_{safe}"
@@ -676,18 +703,27 @@ def delete_{safe_name}({pk.name}: {pk_type}) -> dict:
 
             # get_<table>
             if pk:
-                specs.append(ToolSpec(
-                    name=f"get_{safe_name}",
-                    description=f"Get a {table.name} record by {pk.name}",
-                    input_schema={
-                        "type": "object",
-                        "properties": {
-                            pk.name: {"type": pk.to_json_schema_type(), "description": "Primary key value"},
+                specs.append(
+                    ToolSpec(
+                        name=f"get_{safe_name}",
+                        description=f"Get a {table.name} record by {pk.name}",
+                        input_schema={
+                            "type": "object",
+                            "properties": {
+                                pk.name: {
+                                    "type": pk.to_json_schema_type(),
+                                    "description": "Primary key value",
+                                },
+                            },
+                            "required": [pk.name],
                         },
-                        "required": [pk.name],
-                    },
-                    dependencies=["sqlite3"] if self.db_type == DatabaseType.SQLITE else ["psycopg2"],
-                ))
+                        dependencies=(
+                            ["sqlite3"]
+                            if self.db_type == DatabaseType.SQLITE
+                            else ["psycopg2"]
+                        ),
+                    )
+                )
 
             # list_<table>
             list_props = {}
@@ -696,15 +732,29 @@ def delete_{safe_name}({pk.name}: {pk_type}) -> dict:
                     "type": col.to_json_schema_type(),
                     "description": f"Filter by {col.name}",
                 }
-            list_props["limit"] = {"type": "integer", "description": "Max records", "default": 100}
-            list_props["offset"] = {"type": "integer", "description": "Records to skip", "default": 0}
+            list_props["limit"] = {
+                "type": "integer",
+                "description": "Max records",
+                "default": 100,
+            }
+            list_props["offset"] = {
+                "type": "integer",
+                "description": "Records to skip",
+                "default": 0,
+            }
 
-            specs.append(ToolSpec(
-                name=f"list_{safe_name}",
-                description=f"List {table.name} records with optional filtering",
-                input_schema={"type": "object", "properties": list_props},
-                dependencies=["sqlite3"] if self.db_type == DatabaseType.SQLITE else ["psycopg2"],
-            ))
+            specs.append(
+                ToolSpec(
+                    name=f"list_{safe_name}",
+                    description=f"List {table.name} records with optional filtering",
+                    input_schema={"type": "object", "properties": list_props},
+                    dependencies=(
+                        ["sqlite3"]
+                        if self.db_type == DatabaseType.SQLITE
+                        else ["psycopg2"]
+                    ),
+                )
+            )
 
             # create_<table>
             create_props = {}
@@ -719,16 +769,22 @@ def delete_{safe_name}({pk.name}: {pk_type}) -> dict:
                 if not col.is_nullable and not col.default_value:
                     create_required.append(col.name)
 
-            specs.append(ToolSpec(
-                name=f"create_{safe_name}",
-                description=f"Create a new {table.name} record",
-                input_schema={
-                    "type": "object",
-                    "properties": create_props,
-                    "required": create_required,
-                },
-                dependencies=["sqlite3"] if self.db_type == DatabaseType.SQLITE else ["psycopg2"],
-            ))
+            specs.append(
+                ToolSpec(
+                    name=f"create_{safe_name}",
+                    description=f"Create a new {table.name} record",
+                    input_schema={
+                        "type": "object",
+                        "properties": create_props,
+                        "required": create_required,
+                    },
+                    dependencies=(
+                        ["sqlite3"]
+                        if self.db_type == DatabaseType.SQLITE
+                        else ["psycopg2"]
+                    ),
+                )
+            )
 
             # update_<table>
             if pk:
@@ -736,28 +792,40 @@ def delete_{safe_name}({pk.name}: {pk_type}) -> dict:
                 for col in table.non_pk_columns:
                     update_props[col.name] = {"type": col.to_json_schema_type()}
 
-                specs.append(ToolSpec(
-                    name=f"update_{safe_name}",
-                    description=f"Update a {table.name} record",
-                    input_schema={
-                        "type": "object",
-                        "properties": update_props,
-                        "required": [pk.name],
-                    },
-                    dependencies=["sqlite3"] if self.db_type == DatabaseType.SQLITE else ["psycopg2"],
-                ))
+                specs.append(
+                    ToolSpec(
+                        name=f"update_{safe_name}",
+                        description=f"Update a {table.name} record",
+                        input_schema={
+                            "type": "object",
+                            "properties": update_props,
+                            "required": [pk.name],
+                        },
+                        dependencies=(
+                            ["sqlite3"]
+                            if self.db_type == DatabaseType.SQLITE
+                            else ["psycopg2"]
+                        ),
+                    )
+                )
 
                 # delete_<table>
-                specs.append(ToolSpec(
-                    name=f"delete_{safe_name}",
-                    description=f"Delete a {table.name} record",
-                    input_schema={
-                        "type": "object",
-                        "properties": {pk.name: {"type": pk.to_json_schema_type()}},
-                        "required": [pk.name],
-                    },
-                    dependencies=["sqlite3"] if self.db_type == DatabaseType.SQLITE else ["psycopg2"],
-                ))
+                specs.append(
+                    ToolSpec(
+                        name=f"delete_{safe_name}",
+                        description=f"Delete a {table.name} record",
+                        input_schema={
+                            "type": "object",
+                            "properties": {pk.name: {"type": pk.to_json_schema_type()}},
+                            "required": [pk.name],
+                        },
+                        dependencies=(
+                            ["sqlite3"]
+                            if self.db_type == DatabaseType.SQLITE
+                            else ["psycopg2"]
+                        ),
+                    )
+                )
 
         return specs
 

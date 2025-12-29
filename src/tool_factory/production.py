@@ -13,6 +13,7 @@ from enum import Enum
 
 class LogLevel(Enum):
     """Log levels for structured logging."""
+
     DEBUG = "DEBUG"
     INFO = "INFO"
     WARNING = "WARNING"
@@ -21,13 +22,15 @@ class LogLevel(Enum):
 
 class RateLimitBackend(Enum):
     """Rate limiting backend options."""
+
     MEMORY = "memory"  # Single-instance only
-    REDIS = "redis"    # Distributed, production-ready
+    REDIS = "redis"  # Distributed, production-ready
 
 
 @dataclass
 class ProductionConfig:
     """Configuration for production features."""
+
     enable_logging: bool = True
     log_level: LogLevel = LogLevel.INFO
     log_json: bool = True
@@ -57,29 +60,39 @@ class ProductionCodeGenerator:
         imports = []
 
         if self.config.enable_logging:
-            imports.extend([
-                "import logging",
-                "import json",
-                "from datetime import datetime",
-            ])
+            imports.extend(
+                [
+                    "import logging",
+                    "import json",
+                    "from datetime import datetime",
+                ]
+            )
 
         if self.config.enable_metrics:
-            imports.append("from prometheus_client import Counter, Histogram, start_http_server")
+            imports.append(
+                "from prometheus_client import Counter, Histogram, start_http_server"
+            )
 
         if self.config.enable_rate_limiting:
-            imports.extend([
-                "import time",
-                "from collections import defaultdict",
-                "from threading import Lock",
-            ])
+            imports.extend(
+                [
+                    "import time",
+                    "from collections import defaultdict",
+                    "from threading import Lock",
+                ]
+            )
             if self.config.rate_limit_backend == RateLimitBackend.REDIS:
-                imports.append("# Redis is imported inside RedisRateLimiter to allow graceful fallback")
+                imports.append(
+                    "# Redis is imported inside RedisRateLimiter to allow graceful fallback"
+                )
 
         if self.config.enable_retries:
-            imports.extend([
-                "import random",
-                "from functools import wraps",
-            ])
+            imports.extend(
+                [
+                    "import random",
+                    "from functools import wraps",
+                ]
+            )
 
         return "\n".join(imports)
 
@@ -624,30 +637,38 @@ async def async_retry_with_backoff(
 
         timing_code = ""
         if self.config.enable_logging or self.config.enable_metrics:
-            timing_code = '''
+            timing_code = """
     start_time = time.time()
     success = True
-    error_msg = None'''
+    error_msg = None"""
 
         rate_limit_code = ""
         if self.config.enable_rate_limiting:
-            rate_limit_code = '''
+            rate_limit_code = """
     # Check rate limit
     rate_limit_error = check_rate_limit()
     if rate_limit_error:
-        return rate_limit_error'''
+        return rate_limit_error"""
 
         post_call_code = ""
         if self.config.enable_logging or self.config.enable_metrics:
-            log_code = "log_tool_call(tool_name, duration_ms, success, error_msg)" if self.config.enable_logging else ""
-            metrics_code = "record_tool_metrics(tool_name, duration_seconds, success, type(e).__name__ if error_msg else None)" if self.config.enable_metrics else ""
+            log_code = (
+                "log_tool_call(tool_name, duration_ms, success, error_msg)"
+                if self.config.enable_logging
+                else ""
+            )
+            metrics_code = (
+                "record_tool_metrics(tool_name, duration_seconds, success, type(e).__name__ if error_msg else None)"
+                if self.config.enable_metrics
+                else ""
+            )
 
-            post_call_code = f'''
+            post_call_code = f"""
     finally:
         duration_seconds = time.time() - start_time
         duration_ms = duration_seconds * 1000
         {log_code}
-        {metrics_code}'''
+        {metrics_code}"""
 
         return f'''
 # ============== TOOL WRAPPER ==============

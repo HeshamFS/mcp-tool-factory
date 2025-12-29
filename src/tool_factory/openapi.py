@@ -23,6 +23,7 @@ logger = logging.getLogger(__name__)
 
 class AuthType(Enum):
     """Authentication types supported by OpenAPI."""
+
     NONE = "none"
     API_KEY = "apiKey"
     BEARER = "bearer"
@@ -33,22 +34,23 @@ class AuthType(Enum):
 @dataclass
 class AuthConfig:
     """Authentication configuration extracted from OpenAPI."""
+
     auth_type: AuthType = AuthType.NONE
     env_var_name: str = ""  # e.g., "API_KEY"
-    header_name: str = ""   # e.g., "X-API-Key" or "Authorization"
-    in_location: str = ""   # "header", "query", "cookie"
-    scheme: str = ""        # "bearer", "basic"
+    header_name: str = ""  # e.g., "X-API-Key" or "Authorization"
+    in_location: str = ""  # "header", "query", "cookie"
+    scheme: str = ""  # "bearer", "basic"
 
     def to_env_check_code(self) -> str:
         """Generate code to check for required auth env var."""
         if self.auth_type == AuthType.NONE:
             return ""
-        return f'''
+        return f"""
 # Authentication configuration
 {self.env_var_name} = os.environ.get("{self.env_var_name}")
 if not {self.env_var_name}:
     raise ValueError("Missing required environment variable: {self.env_var_name}")
-'''
+"""
 
     def to_header_code(self) -> str:
         """Generate code to add auth headers."""
@@ -62,15 +64,16 @@ if not {self.env_var_name}:
             else:
                 return "headers = {}"
         elif self.auth_type == AuthType.BASIC:
-            return f'''import base64
+            return f"""import base64
 _auth_bytes = base64.b64encode({self.env_var_name}.encode())
-headers = {{"Authorization": f"Basic {{_auth_bytes.decode()}}"}}'''
+headers = {{"Authorization": f"Basic {{_auth_bytes.decode()}}"}}"""
         return "headers = {}"
 
 
 @dataclass
 class EndpointSpec:
     """Specification for a single API endpoint."""
+
     path: str
     method: str  # GET, POST, PUT, DELETE, PATCH
     operation_id: str
@@ -126,7 +129,7 @@ class OpenAPIValidator:
             errors.append("Missing 'openapi' or 'swagger' version field")
         elif not isinstance(version, str):
             errors.append(f"Version must be a string, got {type(version).__name__}")
-        elif not re.match(r'^\d+\.\d+', version):
+        elif not re.match(r"^\d+\.\d+", version):
             errors.append(f"Invalid version format: {version}")
 
         # Check info section
@@ -151,12 +154,22 @@ class OpenAPIValidator:
                 # Validate each method
                 if isinstance(methods, dict):
                     for method, operation in methods.items():
-                        if method.lower() not in ["get", "post", "put", "delete", "patch", "head", "options"]:
+                        if method.lower() not in [
+                            "get",
+                            "post",
+                            "put",
+                            "delete",
+                            "patch",
+                            "head",
+                            "options",
+                        ]:
                             continue  # Skip non-HTTP method keys
                         if isinstance(operation, dict):
                             # Check for operationId
                             if "operationId" not in operation:
-                                logger.debug(f"Missing operationId for {method.upper()} {path}")
+                                logger.debug(
+                                    f"Missing operationId for {method.upper()} {path}"
+                                )
 
         # Validate servers (OpenAPI 3.x)
         servers = spec.get("servers", [])
@@ -166,12 +179,13 @@ class OpenAPIValidator:
                 if url:
                     validation_error = cls._validate_url(url)
                     if validation_error:
-                        errors.append(f"Invalid server URL at index {i}: {validation_error}")
+                        errors.append(
+                            f"Invalid server URL at index {i}: {validation_error}"
+                        )
 
         if errors and raise_on_error:
             raise OpenAPIValidationError(
-                f"OpenAPI specification has {len(errors)} validation error(s)",
-                errors
+                f"OpenAPI specification has {len(errors)} validation error(s)", errors
             )
 
         return errors
@@ -189,7 +203,7 @@ class OpenAPIValidator:
         # Allow template variables in URL
         if "{" in url:
             # Replace template vars for validation
-            url = re.sub(r'\{[^}]+\}', 'placeholder', url)
+            url = re.sub(r"\{[^}]+\}", "placeholder", url)
 
         try:
             parsed = urlparse(url)
@@ -215,7 +229,9 @@ class OpenAPIParser:
         if validate:
             errors = OpenAPIValidator.validate(spec, raise_on_error=False)
             if errors:
-                logger.warning(f"OpenAPI spec has {len(errors)} validation issues: {errors}")
+                logger.warning(
+                    f"OpenAPI spec has {len(errors)} validation issues: {errors}"
+                )
 
         self.spec = spec
         self.version = self._detect_version()
@@ -249,7 +265,9 @@ class OpenAPIParser:
 
         # OpenAPI 3.x
         if "components" in self.spec:
-            security_schemes = self.spec.get("components", {}).get("securitySchemes", {})
+            security_schemes = self.spec.get("components", {}).get(
+                "securitySchemes", {}
+            )
         # Swagger 2.x
         elif "securityDefinitions" in self.spec:
             security_schemes = self.spec.get("securityDefinitions", {})
@@ -264,7 +282,8 @@ class OpenAPIParser:
             if scheme_type == "apikey":
                 return AuthConfig(
                     auth_type=AuthType.API_KEY,
-                    env_var_name=name.upper().replace("-", "_").replace(" ", "_") + "_API_KEY",
+                    env_var_name=name.upper().replace("-", "_").replace(" ", "_")
+                    + "_API_KEY",
                     header_name=scheme.get("name", "X-API-Key"),
                     in_location=scheme.get("in", "header"),
                 )
@@ -312,7 +331,9 @@ class OpenAPIParser:
                 # Generate operation ID if not provided
                 operation_id = operation.get("operationId")
                 if not operation_id:
-                    clean_path = path.replace("/", "_").replace("{", "").replace("}", "")
+                    clean_path = (
+                        path.replace("/", "_").replace("{", "").replace("}", "")
+                    )
                     operation_id = f"{method}{clean_path}"
 
                 # Merge path-level and operation-level parameters
@@ -326,18 +347,20 @@ class OpenAPIParser:
                 if request_body:
                     request_body = self._resolve_ref(request_body)
 
-                endpoints.append(EndpointSpec(
-                    path=path,
-                    method=method.upper(),
-                    operation_id=operation_id,
-                    summary=operation.get("summary", ""),
-                    description=operation.get("description", ""),
-                    parameters=resolved_params,
-                    request_body=request_body,
-                    responses=operation.get("responses", {}),
-                    security=operation.get("security", []),
-                    tags=operation.get("tags", []),
-                ))
+                endpoints.append(
+                    EndpointSpec(
+                        path=path,
+                        method=method.upper(),
+                        operation_id=operation_id,
+                        summary=operation.get("summary", ""),
+                        description=operation.get("description", ""),
+                        parameters=resolved_params,
+                        request_body=request_body,
+                        responses=operation.get("responses", {}),
+                        security=operation.get("security", []),
+                        tags=operation.get("tags", []),
+                    )
+                )
 
         return endpoints
 
@@ -374,7 +397,9 @@ class OpenAPIServerGenerator:
             self.base_url = base_url.rstrip("/")
         else:
             servers = self.parser.get_servers()
-            self.base_url = servers[0]["url"].rstrip("/") if servers else "http://localhost"
+            self.base_url = (
+                servers[0]["url"].rstrip("/") if servers else "http://localhost"
+            )
 
         self.auth_config = self.parser.get_auth_config()
         self.endpoints = self.parser.get_endpoints()
@@ -421,14 +446,16 @@ class OpenAPIServerGenerator:
             code_parts.append(self._generate_tool(endpoint))
 
         # Add main block
-        code_parts.extend([
-            "",
-            "# ============== MAIN ==============",
-            "",
-            'if __name__ == "__main__":',
-            '    mcp.run(transport="stdio")',
-            "",
-        ])
+        code_parts.extend(
+            [
+                "",
+                "# ============== MAIN ==============",
+                "",
+                'if __name__ == "__main__":',
+                '    mcp.run(transport="stdio")',
+                "",
+            ]
+        )
 
         return "\n".join(code_parts)
 
@@ -484,14 +511,14 @@ async def _make_request(
         auth_check = ""
         if self.auth_config.auth_type != AuthType.NONE:
             env_var = self.auth_config.env_var_name
-            auth_check = f'''
+            auth_check = f"""
     # Check auth configuration
     auth_status = "configured" if {env_var} else "MISSING"
     result["auth_config"] = {{"{env_var}": auth_status}}
     if auth_status == "MISSING":
         result["status"] = "unhealthy"
         result["error"] = "Missing API authentication"
-'''
+"""
 
         return f'''
 # ============== HEALTH CHECK ==============
@@ -564,7 +591,11 @@ def health_check() -> dict:
 
         # Build function body
         func_name = self._sanitize_name(endpoint.operation_id)
-        description = endpoint.summary or endpoint.description or f"{endpoint.method} {endpoint.path}"
+        description = (
+            endpoint.summary
+            or endpoint.description
+            or f"{endpoint.method} {endpoint.path}"
+        )
 
         # Build path with path parameters
         path_code = f'"{endpoint.path}"'
@@ -665,12 +696,16 @@ async def {func_name}({params_str}) -> dict:
                     "description": "JSON request body",
                 }
 
-            specs.append(ToolSpec(
-                name=self._sanitize_name(endpoint.operation_id),
-                description=endpoint.summary or endpoint.description or f"{endpoint.method} {endpoint.path}",
-                input_schema=input_schema,
-                dependencies=["httpx"],
-            ))
+            specs.append(
+                ToolSpec(
+                    name=self._sanitize_name(endpoint.operation_id),
+                    description=endpoint.summary
+                    or endpoint.description
+                    or f"{endpoint.method} {endpoint.path}",
+                    input_schema=input_schema,
+                    dependencies=["httpx"],
+                )
+            )
 
         return specs
 

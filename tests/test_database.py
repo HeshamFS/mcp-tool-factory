@@ -148,16 +148,19 @@ class TestDatabaseIntrospector:
         cursor = conn.cursor()
 
         # Create test tables
-        cursor.execute("""
+        cursor.execute(
+            """
             CREATE TABLE users (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL,
                 email TEXT UNIQUE,
                 created_at TEXT DEFAULT CURRENT_TIMESTAMP
             )
-        """)
+        """
+        )
 
-        cursor.execute("""
+        cursor.execute(
+            """
             CREATE TABLE posts (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 user_id INTEGER NOT NULL,
@@ -165,7 +168,8 @@ class TestDatabaseIntrospector:
                 content TEXT,
                 FOREIGN KEY (user_id) REFERENCES users(id)
             )
-        """)
+        """
+        )
 
         conn.commit()
         conn.close()
@@ -254,7 +258,9 @@ class TestDatabaseServerGenerator:
                 name="posts",
                 columns=[
                     ColumnInfo(name="id", data_type="INTEGER", is_primary_key=True),
-                    ColumnInfo(name="user_id", data_type="INTEGER", foreign_key="users.id"),
+                    ColumnInfo(
+                        name="user_id", data_type="INTEGER", foreign_key="users.id"
+                    ),
                     ColumnInfo(name="title", data_type="TEXT", is_nullable=False),
                     ColumnInfo(name="content", data_type="TEXT"),
                 ],
@@ -509,7 +515,8 @@ class TestDatabaseIntegration:
         conn = sqlite3.connect(path)
         cursor = conn.cursor()
 
-        cursor.execute("""
+        cursor.execute(
+            """
             CREATE TABLE products (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL,
@@ -517,7 +524,8 @@ class TestDatabaseIntegration:
                 quantity INTEGER DEFAULT 0,
                 is_active BOOLEAN DEFAULT 1
             )
-        """)
+        """
+        )
 
         # Insert test data
         cursor.execute(

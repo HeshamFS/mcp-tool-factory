@@ -90,7 +90,9 @@ class TestFactoryConfig:
 
     def test_provider_claude_code(self):
         """Test Claude Code provider configuration."""
-        with patch.dict(os.environ, {"CLAUDE_CODE_OAUTH_TOKEN": "oauth-token"}, clear=False):
+        with patch.dict(
+            os.environ, {"CLAUDE_CODE_OAUTH_TOKEN": "oauth-token"}, clear=False
+        ):
             config = FactoryConfig(provider=LLMProvider.CLAUDE_CODE)
 
             assert config.provider == LLMProvider.CLAUDE_CODE

@@ -14,6 +14,7 @@ from urllib.parse import urlparse
 @dataclass
 class ValidationResult:
     """Result of a validation operation."""
+
     is_valid: bool
     value: Any
     error: str | None = None
@@ -129,7 +130,9 @@ def validate_integer(
         ValidationResult with the validated value
     """
     if isinstance(value, bool):
-        return ValidationResult.failure(f"{name} must be an integer, not boolean", value)
+        return ValidationResult.failure(
+            f"{name} must be an integer, not boolean", value
+        )
 
     if not isinstance(value, int):
         if coerce:
@@ -141,14 +144,10 @@ def validate_integer(
             return ValidationResult.failure(f"{name} must be an integer", value)
 
     if minimum is not None and value < minimum:
-        return ValidationResult.failure(
-            f"{name} must be at least {minimum}", value
-        )
+        return ValidationResult.failure(f"{name} must be at least {minimum}", value)
 
     if maximum is not None and value > maximum:
-        return ValidationResult.failure(
-            f"{name} must be at most {maximum}", value
-        )
+        return ValidationResult.failure(f"{name} must be at most {maximum}", value)
 
     return ValidationResult.success(value)
 
@@ -195,14 +194,10 @@ def validate_number(
         return ValidationResult.failure(f"{name} cannot be infinity", value)
 
     if minimum is not None and value < minimum:
-        return ValidationResult.failure(
-            f"{name} must be at least {minimum}", value
-        )
+        return ValidationResult.failure(f"{name} must be at least {minimum}", value)
 
     if maximum is not None and value > maximum:
-        return ValidationResult.failure(
-            f"{name} must be at most {maximum}", value
-        )
+        return ValidationResult.failure(f"{name} must be at most {maximum}", value)
 
     return ValidationResult.success(value)
 
@@ -239,7 +234,9 @@ def validate_url(
         return ValidationResult.failure(f"{name} is not a valid URL", value)
 
     if not parsed.scheme:
-        return ValidationResult.failure(f"{name} must have a scheme (e.g., https://)", value)
+        return ValidationResult.failure(
+            f"{name} must have a scheme (e.g., https://)", value
+        )
 
     if parsed.scheme not in allowed_schemes:
         return ValidationResult.failure(

@@ -91,7 +91,9 @@ class ToolFactoryAgent:
         # Validate config
         errors = self.config.validate()
         if errors:
-            raise ValueError("Configuration errors:\n" + "\n".join(f"  - {e}" for e in errors))
+            raise ValueError(
+                "Configuration errors:\n" + "\n".join(f"  - {e}" for e in errors)
+            )
 
         # Initialize LLM provider using the new provider system
         from tool_factory.providers import create_provider
@@ -106,7 +108,9 @@ class ToolFactoryAgent:
         self.server_generator = ServerGenerator()
         self.docs_generator = DocsGenerator()
 
-    def _search_for_context(self, description: str, logger: ExecutionLogger | None = None) -> str | None:
+    def _search_for_context(
+        self, description: str, logger: ExecutionLogger | None = None
+    ) -> str | None:
         """Search the web for API documentation and examples.
 
         Uses the provider's native web search tool to gather context
@@ -120,11 +124,17 @@ class ToolFactoryAgent:
             String with relevant context or None if search fails
         """
         try:
-            from tool_factory.web_search import search_for_api_info_with_logging, _generate_search_queries
+            from tool_factory.web_search import (
+                search_for_api_info_with_logging,
+                _generate_search_queries,
+            )
 
             queries = _generate_search_queries(description)
             if logger:
-                logger.log_step("web_search_start", f"Starting web search with {len(queries)} queries")
+                logger.log_step(
+                    "web_search_start",
+                    f"Starting web search with {len(queries)} queries",
+                )
 
             result = search_for_api_info_with_logging(
                 description=description,
@@ -135,7 +145,10 @@ class ToolFactoryAgent:
             )
 
             if logger:
-                logger.log_step("web_search_complete", f"Web search complete, got {len(result) if result else 0} chars")
+                logger.log_step(
+                    "web_search_complete",
+                    f"Web search complete, got {len(result) if result else 0} chars",
+                )
 
             return result
         except Exception as e:
@@ -166,7 +179,9 @@ class ToolFactoryAgent:
         if web_search:
             search_context = self._search_for_context(description)
             if search_context:
-                enhanced_description = f"{description}\n\n## Research Context:\n{search_context}"
+                enhanced_description = (
+                    f"{description}\n\n## Research Context:\n{search_context}"
+                )
 
         # Step 1: Extract tool specifications from description
         tool_specs = await self._extract_tool_specs(enhanced_description)
@@ -220,7 +235,9 @@ class ToolFactoryAgent:
             logger.log_step("web_search", "Starting web research for API documentation")
             search_context = self._search_for_context(description, logger=logger)
             if search_context:
-                enhanced_description = f"{description}\n\n## Research Context:\n{search_context}"
+                enhanced_description = (
+                    f"{description}\n\n## Research Context:\n{search_context}"
+                )
 
         # Step 1: Extract tool specifications (with logging)
         logger.log_step("extract_specs", "Sending prompt to LLM for tool extraction")
@@ -289,10 +306,14 @@ class ToolFactoryAgent:
             server_code=server_code,
             tool_specs=tool_specs,
             test_code=self.server_generator.generate_tests(tool_specs),
-            dockerfile=self.server_generator.generate_dockerfile(tool_specs, auth_env_vars),
+            dockerfile=self.server_generator.generate_dockerfile(
+                tool_specs, auth_env_vars
+            ),
             readme=self.docs_generator.generate_readme(server_name, tool_specs),
             skill_file=self.docs_generator.generate_skill(server_name, tool_specs),
-            pyproject_toml=self.server_generator.generate_pyproject(server_name, tool_specs),
+            pyproject_toml=self.server_generator.generate_pyproject(
+                server_name, tool_specs
+            ),
             github_actions=self.server_generator.generate_github_actions(
                 server_name, tool_specs, auth_env_vars
             ),
@@ -326,7 +347,9 @@ class ToolFactoryAgent:
             ),
             readme=self.docs_generator.generate_readme(server_name, tool_specs),
             skill_file=self.docs_generator.generate_skill(server_name, tool_specs),
-            pyproject_toml=self.server_generator.generate_pyproject(server_name, tool_specs),
+            pyproject_toml=self.server_generator.generate_pyproject(
+                server_name, tool_specs
+            ),
             github_actions=self.server_generator.generate_github_actions(
                 server_name, tool_specs, auth_env_vars or []
             ),
@@ -337,7 +360,9 @@ class ToolFactoryAgent:
         """Extract tool specifications from natural language description."""
         return self._extract_tool_specs_sync(description)
 
-    def _extract_tool_specs_sync(self, description: str, logger: ExecutionLogger | None = None) -> list[ToolSpec]:
+    def _extract_tool_specs_sync(
+        self, description: str, logger: ExecutionLogger | None = None
+    ) -> list[ToolSpec]:
         """Synchronous extraction of tool specs with validation.
 
         Uses Pydantic validation to ensure LLM responses conform to expected schema.
@@ -379,13 +404,17 @@ class ToolFactoryAgent:
         """Generate implementation for a single tool."""
         return self._generate_implementation_sync(spec)
 
-    def _generate_implementation_sync(self, spec: ToolSpec, logger: ExecutionLogger | None = None) -> str:
+    def _generate_implementation_sync(
+        self, spec: ToolSpec, logger: ExecutionLogger | None = None
+    ) -> str:
         """Synchronous implementation generation."""
         prompt = GENERATE_IMPLEMENTATION_PROMPT.format(
             name=spec.name,
             description=spec.description,
             input_schema=json.dumps(spec.input_schema, indent=2),
-            output_schema=json.dumps(spec.output_schema, indent=2) if spec.output_schema else "{}",
+            output_schema=(
+                json.dumps(spec.output_schema, indent=2) if spec.output_schema else "{}"
+            ),
             hints=spec.implementation_hints or "None provided",
             dependencies=", ".join(spec.dependencies) if spec.dependencies else "None",
         )
@@ -400,7 +429,9 @@ class ToolFactoryAgent:
 
         return content.strip()
 
-    def _call_llm(self, prompt: str, max_tokens: int = 4096, logger: ExecutionLogger | None = None) -> str:
+    def _call_llm(
+        self, prompt: str, max_tokens: int = 4096, logger: ExecutionLogger | None = None
+    ) -> str:
         """Call the LLM with the given prompt using the provider abstraction.
 
         This method delegates to the configured provider and handles logging.
@@ -479,7 +510,9 @@ class ToolFactoryAgent:
                 tool_specs.append(
                     ToolSpec(
                         name=name,
-                        description=operation.get("summary", operation.get("description", "")),
+                        description=operation.get(
+                            "summary", operation.get("description", "")
+                        ),
                         input_schema=input_schema,
                         dependencies=["httpx"],
                     )

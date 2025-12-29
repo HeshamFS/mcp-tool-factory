@@ -9,6 +9,7 @@ from typing import Any
 @dataclass
 class WebSearchEntry:
     """A single web search query and its results."""
+
     query: str
     results: str
     sources: list[str] = field(default_factory=list)
@@ -18,6 +19,7 @@ class WebSearchEntry:
 @dataclass
 class GenerationStep:
     """A single step in the generation process."""
+
     step_name: str
     description: str
     input_data: str | None = None
@@ -28,6 +30,7 @@ class GenerationStep:
 @dataclass
 class GenerationLog:
     """Complete log of the generation process."""
+
     # Metadata
     server_name: str
     created_at: str = field(default_factory=lambda: datetime.now().isoformat())
@@ -51,22 +54,34 @@ class GenerationLog:
     tools_generated: list[str] = field(default_factory=list)
     dependencies_used: list[str] = field(default_factory=list)
 
-    def add_step(self, name: str, description: str, input_data: str | None = None, output_data: str | None = None) -> None:
+    def add_step(
+        self,
+        name: str,
+        description: str,
+        input_data: str | None = None,
+        output_data: str | None = None,
+    ) -> None:
         """Add a generation step to the log."""
-        self.steps.append(GenerationStep(
-            step_name=name,
-            description=description,
-            input_data=input_data,
-            output_data=output_data,
-        ))
+        self.steps.append(
+            GenerationStep(
+                step_name=name,
+                description=description,
+                input_data=input_data,
+                output_data=output_data,
+            )
+        )
 
-    def add_web_search(self, query: str, results: str, sources: list[str] | None = None) -> None:
+    def add_web_search(
+        self, query: str, results: str, sources: list[str] | None = None
+    ) -> None:
         """Add a web search entry to the log."""
-        self.web_searches.append(WebSearchEntry(
-            query=query,
-            results=results,
-            sources=sources or [],
-        ))
+        self.web_searches.append(
+            WebSearchEntry(
+                query=query,
+                results=results,
+                sources=sources or [],
+            )
+        )
 
     def to_markdown(self) -> str:
         """Generate a markdown log file."""
@@ -90,21 +105,26 @@ class GenerationLog:
 
         # Web search section
         if self.web_searches:
-            lines.extend([
-                "---",
-                "",
-                "## Web Research",
-                "",
-                "The following web searches were performed to gather context:",
-                "",
-            ])
+            lines.extend(
+                [
+                    "---",
+                    "",
+                    "## Web Research",
+                    "",
+                    "The following web searches were performed to gather context:",
+                    "",
+                ]
+            )
             for i, search in enumerate(self.web_searches, 1):
-                lines.extend([
-                    f"### Search {i}: `{search.query}`",
-                    "",
-                    search.results[:2000] + ("..." if len(search.results) > 2000 else ""),
-                    "",
-                ])
+                lines.extend(
+                    [
+                        f"### Search {i}: `{search.query}`",
+                        "",
+                        search.results[:2000]
+                        + ("..." if len(search.results) > 2000 else ""),
+                        "",
+                    ]
+                )
                 if search.sources:
                     lines.append("**Sources:**")
                     for source in search.sources[:5]:
@@ -112,74 +132,94 @@ class GenerationLog:
                     lines.append("")
 
         # Enhanced description
-        if self.enhanced_description and self.enhanced_description != self.original_description:
-            lines.extend([
-                "---",
-                "",
-                "## Enhanced Description (with research)",
-                "",
-                "```",
-                self.enhanced_description[:3000] + ("..." if len(self.enhanced_description) > 3000 else ""),
-                "```",
-                "",
-            ])
+        if (
+            self.enhanced_description
+            and self.enhanced_description != self.original_description
+        ):
+            lines.extend(
+                [
+                    "---",
+                    "",
+                    "## Enhanced Description (with research)",
+                    "",
+                    "```",
+                    self.enhanced_description[:3000]
+                    + ("..." if len(self.enhanced_description) > 3000 else ""),
+                    "```",
+                    "",
+                ]
+            )
 
         # Generation steps
         if self.steps:
-            lines.extend([
-                "---",
-                "",
-                "## Generation Steps",
-                "",
-            ])
+            lines.extend(
+                [
+                    "---",
+                    "",
+                    "## Generation Steps",
+                    "",
+                ]
+            )
             for i, step in enumerate(self.steps, 1):
-                lines.extend([
-                    f"### Step {i}: {step.step_name}",
-                    "",
-                    step.description,
-                    "",
-                ])
+                lines.extend(
+                    [
+                        f"### Step {i}: {step.step_name}",
+                        "",
+                        step.description,
+                        "",
+                    ]
+                )
                 if step.input_data:
-                    lines.extend([
-                        "<details>",
-                        "<summary>Input Data</summary>",
-                        "",
-                        "```",
-                        step.input_data[:1000] + ("..." if len(step.input_data) > 1000 else ""),
-                        "```",
-                        "</details>",
-                        "",
-                    ])
+                    lines.extend(
+                        [
+                            "<details>",
+                            "<summary>Input Data</summary>",
+                            "",
+                            "```",
+                            step.input_data[:1000]
+                            + ("..." if len(step.input_data) > 1000 else ""),
+                            "```",
+                            "</details>",
+                            "",
+                        ]
+                    )
                 if step.output_data:
-                    lines.extend([
-                        "<details>",
-                        "<summary>Output Data</summary>",
-                        "",
-                        "```",
-                        step.output_data[:1000] + ("..." if len(step.output_data) > 1000 else ""),
-                        "```",
-                        "</details>",
-                        "",
-                    ])
+                    lines.extend(
+                        [
+                            "<details>",
+                            "<summary>Output Data</summary>",
+                            "",
+                            "```",
+                            step.output_data[:1000]
+                            + ("..." if len(step.output_data) > 1000 else ""),
+                            "```",
+                            "</details>",
+                            "",
+                        ]
+                    )
 
         # Tools generated
         if self.tools_generated:
-            lines.extend([
-                "---",
-                "",
-                "## Tools Generated",
-                "",
-            ])
+            lines.extend(
+                [
+                    "---",
+                    "",
+                    "## Tools Generated",
+                    "",
+                ]
+            )
             for tool in self.tools_generated:
                 lines.append(f"- `{tool}`")
             lines.append("")
 
         # Dependencies
         if self.dependencies_used:
-            lines.extend([
-                "## Dependencies",
-                "",
-            ])
+            lines.extend(
+                [
+                    "## Dependencies",
+                    "",
+                ]
+            )
             for dep in self.dependencies_used:
                 lines.append(f"- `{dep}`")
             lines.append("")
@@ -232,7 +272,9 @@ class GeneratedServer:
     skill_file: str
     pyproject_toml: str
     github_actions: str = ""  # CI/CD workflow YAML
-    execution_log: Any = None  # ExecutionLogger - imported dynamically to avoid circular imports
+    execution_log: Any = (
+        None  # ExecutionLogger - imported dynamically to avoid circular imports
+    )
 
     def write_to_directory(self, output_path: str) -> None:
         """Write all generated files to a directory."""

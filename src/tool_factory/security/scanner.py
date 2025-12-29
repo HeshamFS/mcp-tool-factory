@@ -18,6 +18,7 @@ from typing import Any
 
 class IssueSeverity(Enum):
     """Severity levels for security issues."""
+
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
@@ -27,6 +28,7 @@ class IssueSeverity(Enum):
 @dataclass
 class SecurityIssue:
     """A detected security issue."""
+
     severity: IssueSeverity
     category: str
     message: str
@@ -49,6 +51,7 @@ class SecurityIssue:
 @dataclass
 class ScanRule:
     """A security scanning rule."""
+
     name: str
     category: str
     severity: IssueSeverity
@@ -71,7 +74,7 @@ class SecurityScanner:
             pattern=r'(?i)(password|passwd|pwd)\s*=\s*["\'][^"\']+["\']',
             message="Hardcoded password detected",
             recommendation="Use environment variables or a secrets manager",
-            exclude_patterns=[r'password\s*=\s*["\'][\$\{]', r'getenv'],
+            exclude_patterns=[r'password\s*=\s*["\'][\$\{]', r"getenv"],
         ),
         ScanRule(
             name="hardcoded_api_key",
@@ -80,7 +83,7 @@ class SecurityScanner:
             pattern=r'(?i)(api[_-]?key|apikey|secret[_-]?key)\s*=\s*["\'][a-zA-Z0-9_-]{20,}["\']',
             message="Hardcoded API key detected",
             recommendation="Use environment variables or a secrets manager",
-            exclude_patterns=[r'os\.environ', r'getenv'],
+            exclude_patterns=[r"os\.environ", r"getenv"],
         ),
         ScanRule(
             name="hardcoded_token",
@@ -89,9 +92,8 @@ class SecurityScanner:
             pattern=r'(?i)(token|bearer|auth)\s*=\s*["\'][a-zA-Z0-9_-]{20,}["\']',
             message="Hardcoded token detected",
             recommendation="Use environment variables or a secrets manager",
-            exclude_patterns=[r'os\.environ', r'getenv', r'placeholder'],
+            exclude_patterns=[r"os\.environ", r"getenv", r"placeholder"],
         ),
-
         # SQL injection
         ScanRule(
             name="sql_injection_format",
@@ -105,7 +107,7 @@ class SecurityScanner:
             name="sql_injection_concat",
             category="injection",
             severity=IssueSeverity.CRITICAL,
-            pattern=r'(?i)(execute|cursor\.execute)\s*\([^)]*\+\s*[^)]+\)',
+            pattern=r"(?i)(execute|cursor\.execute)\s*\([^)]*\+\s*[^)]+\)",
             message="Potential SQL injection via string concatenation",
             recommendation="Use parameterized queries instead",
         ),
@@ -117,13 +119,12 @@ class SecurityScanner:
             message="Potential SQL injection via % formatting",
             recommendation="Use parameterized queries with proper escaping",
         ),
-
         # Command injection
         ScanRule(
             name="command_injection_os",
             category="injection",
             severity=IssueSeverity.CRITICAL,
-            pattern=r'os\.system\s*\(',
+            pattern=r"os\.system\s*\(",
             message="os.system() is vulnerable to command injection",
             recommendation="Use subprocess.run() with shell=False",
         ),
@@ -131,7 +132,7 @@ class SecurityScanner:
             name="command_injection_popen",
             category="injection",
             severity=IssueSeverity.HIGH,
-            pattern=r'os\.popen\s*\(',
+            pattern=r"os\.popen\s*\(",
             message="os.popen() is vulnerable to command injection",
             recommendation="Use subprocess.run() with shell=False",
         ),
@@ -139,7 +140,7 @@ class SecurityScanner:
             name="command_injection_shell",
             category="injection",
             severity=IssueSeverity.HIGH,
-            pattern=r'subprocess\.[^(]+\([^)]*shell\s*=\s*True',
+            pattern=r"subprocess\.[^(]+\([^)]*shell\s*=\s*True",
             message="subprocess with shell=True is vulnerable to injection",
             recommendation="Use shell=False with a list of arguments",
         ),
@@ -147,7 +148,7 @@ class SecurityScanner:
             name="command_injection_eval",
             category="injection",
             severity=IssueSeverity.CRITICAL,
-            pattern=r'(?<!#\s)eval\s*\(',
+            pattern=r"(?<!#\s)eval\s*\(",
             message="eval() is dangerous and can execute arbitrary code",
             recommendation="Avoid eval(); use ast.literal_eval() for safe evaluation",
         ),
@@ -155,37 +156,34 @@ class SecurityScanner:
             name="command_injection_exec",
             category="injection",
             severity=IssueSeverity.CRITICAL,
-            pattern=r'(?<!#\s)exec\s*\(',
+            pattern=r"(?<!#\s)exec\s*\(",
             message="exec() is dangerous and can execute arbitrary code",
             recommendation="Avoid exec(); find safer alternatives",
         ),
-
         # Path traversal
         ScanRule(
             name="path_traversal",
             category="path_traversal",
             severity=IssueSeverity.HIGH,
-            pattern=r'open\s*\([^)]*\+\s*[^)]+\)',
+            pattern=r"open\s*\([^)]*\+\s*[^)]+\)",
             message="Potential path traversal via string concatenation in file path",
             recommendation="Validate and sanitize file paths; use pathlib",
         ),
-
         # Insecure randomness
         ScanRule(
             name="insecure_random",
             category="cryptography",
             severity=IssueSeverity.MEDIUM,
-            pattern=r'(?<!secrets\.)random\.(random|randint|choice|shuffle)',
+            pattern=r"(?<!secrets\.)random\.(random|randint|choice|shuffle)",
             message="Using random module for potentially security-sensitive operation",
             recommendation="Use secrets module for security-sensitive randomness",
         ),
-
         # Weak hashing
         ScanRule(
             name="weak_hash_md5",
             category="cryptography",
             severity=IssueSeverity.MEDIUM,
-            pattern=r'hashlib\.md5\s*\(',
+            pattern=r"hashlib\.md5\s*\(",
             message="MD5 is cryptographically weak",
             recommendation="Use SHA-256 or stronger for security purposes",
         ),
@@ -193,17 +191,16 @@ class SecurityScanner:
             name="weak_hash_sha1",
             category="cryptography",
             severity=IssueSeverity.MEDIUM,
-            pattern=r'hashlib\.sha1\s*\(',
+            pattern=r"hashlib\.sha1\s*\(",
             message="SHA-1 is cryptographically weak",
             recommendation="Use SHA-256 or stronger for security purposes",
         ),
-
         # Insecure deserialization
         ScanRule(
             name="pickle_load",
             category="deserialization",
             severity=IssueSeverity.HIGH,
-            pattern=r'pickle\.load[s]?\s*\(',
+            pattern=r"pickle\.load[s]?\s*\(",
             message="Pickle deserialization can execute arbitrary code",
             recommendation="Use JSON or other safe serialization formats",
         ),
@@ -211,17 +208,16 @@ class SecurityScanner:
             name="yaml_load",
             category="deserialization",
             severity=IssueSeverity.HIGH,
-            pattern=r'yaml\.load\s*\([^)]*\)(?!\s*,\s*Loader\s*=\s*yaml\.SafeLoader)',
+            pattern=r"yaml\.load\s*\([^)]*\)(?!\s*,\s*Loader\s*=\s*yaml\.SafeLoader)",
             message="yaml.load() without SafeLoader can execute arbitrary code",
             recommendation="Use yaml.safe_load() or specify Loader=yaml.SafeLoader",
         ),
-
         # Debugging/development code
         ScanRule(
             name="debug_true",
             category="configuration",
             severity=IssueSeverity.MEDIUM,
-            pattern=r'(?i)debug\s*=\s*True',
+            pattern=r"(?i)debug\s*=\s*True",
             message="Debug mode enabled",
             recommendation="Ensure debug is disabled in production",
         ),
@@ -229,21 +225,19 @@ class SecurityScanner:
             name="print_secrets",
             category="logging",
             severity=IssueSeverity.MEDIUM,
-            pattern=r'print\s*\([^)]*(?:password|secret|token|key)[^)]*\)',
+            pattern=r"print\s*\([^)]*(?:password|secret|token|key)[^)]*\)",
             message="Potentially logging sensitive information",
             recommendation="Avoid logging sensitive data; use proper secret handling",
         ),
-
         # Insecure SSL/TLS
         ScanRule(
             name="ssl_verify_false",
             category="network",
             severity=IssueSeverity.HIGH,
-            pattern=r'verify\s*=\s*False',
+            pattern=r"verify\s*=\s*False",
             message="SSL verification disabled",
             recommendation="Enable SSL verification in production",
         ),
-
         # Hardcoded IPs/URLs
         ScanRule(
             name="hardcoded_ip",
@@ -252,7 +246,7 @@ class SecurityScanner:
             pattern=r'["\'](?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)["\']',
             message="Hardcoded IP address detected",
             recommendation="Use configuration or environment variables",
-            exclude_patterns=[r'127\.0\.0\.1', r'0\.0\.0\.0', r'localhost'],
+            exclude_patterns=[r"127\.0\.0\.1", r"0\.0\.0\.0", r"localhost"],
         ),
     ]
 
@@ -294,14 +288,16 @@ class SecurityScanner:
                             break
 
                     if not excluded:
-                        issues.append(SecurityIssue(
-                            severity=rule.severity,
-                            category=rule.category,
-                            message=rule.message,
-                            line_number=line_num,
-                            line_content=line.strip()[:100],
-                            recommendation=rule.recommendation,
-                        ))
+                        issues.append(
+                            SecurityIssue(
+                                severity=rule.severity,
+                                category=rule.category,
+                                message=rule.message,
+                                line_number=line_num,
+                                line_content=line.strip()[:100],
+                                recommendation=rule.recommendation,
+                            )
+                        )
 
         return issues
 
@@ -409,15 +405,22 @@ def generate_security_report(issues: list[SecurityIssue]) -> str:
     for category, count in sorted(summary["by_category"].items()):
         lines.append(f"  {category}: {count}")
 
-    lines.extend([
-        "",
-        "-" * 60,
-        "DETAILED FINDINGS",
-        "-" * 60,
-    ])
+    lines.extend(
+        [
+            "",
+            "-" * 60,
+            "DETAILED FINDINGS",
+            "-" * 60,
+        ]
+    )
 
     # Group by severity
-    for severity in [IssueSeverity.CRITICAL, IssueSeverity.HIGH, IssueSeverity.MEDIUM, IssueSeverity.LOW]:
+    for severity in [
+        IssueSeverity.CRITICAL,
+        IssueSeverity.HIGH,
+        IssueSeverity.MEDIUM,
+        IssueSeverity.LOW,
+    ]:
         severity_issues = [i for i in issues if i.severity == severity]
         if severity_issues:
             lines.append(f"\n[{severity.value.upper()}]")

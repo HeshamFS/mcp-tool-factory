@@ -11,11 +11,9 @@ def test_tool_spec_creation():
         description="A test tool",
         input_schema={
             "type": "object",
-            "properties": {
-                "param1": {"type": "string"}
-            },
-            "required": ["param1"]
-        }
+            "properties": {"param1": {"type": "string"}},
+            "required": ["param1"],
+        },
     )
 
     assert spec.name == "test_tool"
@@ -29,7 +27,7 @@ def test_tool_spec_to_dict():
         name="my_tool",
         description="Does something",
         input_schema={"type": "object", "properties": {}},
-        dependencies=["requests"]
+        dependencies=["requests"],
     )
 
     data = spec.to_dict()

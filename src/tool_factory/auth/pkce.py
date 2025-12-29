@@ -33,10 +33,10 @@ def generate_code_verifier(length: int = 64) -> str:
 
     # Generate random bytes and encode as base64url
     random_bytes = secrets.token_bytes(length)
-    verifier = base64.urlsafe_b64encode(random_bytes).decode('ascii')
+    verifier = base64.urlsafe_b64encode(random_bytes).decode("ascii")
 
     # Remove padding and trim to exact length
-    verifier = verifier.rstrip('=')[:length]
+    verifier = verifier.rstrip("=")[:length]
 
     return verifier
 
@@ -58,9 +58,9 @@ def generate_code_challenge(verifier: str, method: str = "S256") -> str:
         return verifier
     elif method == "S256":
         # SHA-256 hash of the verifier
-        digest = hashlib.sha256(verifier.encode('ascii')).digest()
+        digest = hashlib.sha256(verifier.encode("ascii")).digest()
         # Base64url encode without padding
-        challenge = base64.urlsafe_b64encode(digest).decode('ascii').rstrip('=')
+        challenge = base64.urlsafe_b64encode(digest).decode("ascii").rstrip("=")
         return challenge
     else:
         raise ValueError(f"Unsupported code challenge method: {method}")

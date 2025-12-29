@@ -11,6 +11,7 @@ from typing import Any
 @dataclass
 class PackageVersion:
     """Version information for a package."""
+
     name: str
     min_version: str
     max_version: str | None = None
@@ -54,72 +55,60 @@ KNOWN_PACKAGES: dict[str, PackageVersion] = {
     # Core MCP
     "mcp": PackageVersion("mcp", "1.0.0", "2.0.0"),
     "fastmcp": PackageVersion("fastmcp", "2.0.0", "3.0.0"),
-
     # HTTP/API
     "httpx": PackageVersion("httpx", "0.27.0", "1.0.0"),
     "aiohttp": PackageVersion("aiohttp", "3.9.0", "4.0.0"),
     "requests": PackageVersion("requests", "2.31.0", "3.0.0"),
     "urllib3": PackageVersion("urllib3", "2.0.0", "3.0.0"),
-
     # Async
     "anyio": PackageVersion("anyio", "4.0.0", "5.0.0"),
     "asyncio": PackageVersion("asyncio", "3.4.0"),
-
     # Data validation
     "pydantic": PackageVersion("pydantic", "2.5.0", "3.0.0"),
     "pydantic-settings": PackageVersion("pydantic-settings", "2.1.0", "3.0.0"),
-
     # Serialization
     "orjson": PackageVersion("orjson", "3.9.0", "4.0.0"),
     "ujson": PackageVersion("ujson", "5.9.0", "6.0.0"),
-
     # Database
     "sqlalchemy": PackageVersion("sqlalchemy", "2.0.0", "3.0.0"),
     "asyncpg": PackageVersion("asyncpg", "0.29.0", "1.0.0"),
     "aiosqlite": PackageVersion("aiosqlite", "0.19.0", "1.0.0"),
     "redis": PackageVersion("redis", "5.0.0", "6.0.0"),
-
     # Observability
     "opentelemetry-api": PackageVersion("opentelemetry-api", "1.22.0", "2.0.0"),
     "opentelemetry-sdk": PackageVersion("opentelemetry-sdk", "1.22.0", "2.0.0"),
-    "opentelemetry-exporter-otlp": PackageVersion("opentelemetry-exporter-otlp", "1.22.0", "2.0.0"),
+    "opentelemetry-exporter-otlp": PackageVersion(
+        "opentelemetry-exporter-otlp", "1.22.0", "2.0.0"
+    ),
     "prometheus-client": PackageVersion("prometheus-client", "0.19.0", "1.0.0"),
-
     # Logging
     "structlog": PackageVersion("structlog", "24.1.0", "25.0.0"),
     "loguru": PackageVersion("loguru", "0.7.0", "1.0.0"),
-
     # CLI
     "click": PackageVersion("click", "8.1.0", "9.0.0"),
     "typer": PackageVersion("typer", "0.9.0", "1.0.0"),
     "rich": PackageVersion("rich", "13.7.0", "14.0.0"),
-
     # Testing
     "pytest": PackageVersion("pytest", "8.0.0", "9.0.0"),
     "pytest-asyncio": PackageVersion("pytest-asyncio", "0.23.0", "1.0.0"),
     "pytest-cov": PackageVersion("pytest-cov", "4.1.0", "5.0.0"),
     "httpx-mock": PackageVersion("httpx-mock", "0.30.0", "1.0.0"),
-
     # Security
     "cryptography": PackageVersion("cryptography", "41.0.0", "43.0.0"),
     "python-jose": PackageVersion("python-jose", "3.3.0", "4.0.0"),
     "passlib": PackageVersion("passlib", "1.7.4", "2.0.0"),
-
     # Utilities
     "python-dotenv": PackageVersion("python-dotenv", "1.0.0", "2.0.0"),
     "tenacity": PackageVersion("tenacity", "8.2.0", "9.0.0"),
     "cachetools": PackageVersion("cachetools", "5.3.0", "6.0.0"),
-
     # AI/ML clients
     "anthropic": PackageVersion("anthropic", "0.18.0", "1.0.0"),
     "openai": PackageVersion("openai", "1.12.0", "2.0.0"),
     "google-generativeai": PackageVersion("google-generativeai", "0.4.0", "1.0.0"),
-
     # File handling
     "pillow": PackageVersion("pillow", "10.2.0", "11.0.0"),
     "pypdf": PackageVersion("pypdf", "4.0.0", "5.0.0"),
     "openpyxl": PackageVersion("openpyxl", "3.1.0", "4.0.0"),
-
     # Web scraping
     "beautifulsoup4": PackageVersion("beautifulsoup4", "4.12.0", "5.0.0"),
     "lxml": PackageVersion("lxml", "5.1.0", "6.0.0"),
@@ -172,13 +161,15 @@ def generate_requirements(
         lines.append(get_package_version(pkg, style))
 
     if include_dev:
-        lines.extend([
-            "",
-            "# Development dependencies",
-            get_package_version("pytest", style),
-            get_package_version("pytest-asyncio", style),
-            get_package_version("pytest-cov", style),
-        ])
+        lines.extend(
+            [
+                "",
+                "# Development dependencies",
+                get_package_version("pytest", style),
+                get_package_version("pytest-asyncio", style),
+                get_package_version("pytest-cov", style),
+            ]
+        )
 
     return "\n".join(lines)
 
@@ -235,7 +226,7 @@ def detect_packages_from_imports(code: str) -> list[str]:
     packages = set()
 
     # Match import statements
-    import_pattern = r'^(?:from\s+(\w+)|import\s+(\w+))'
+    import_pattern = r"^(?:from\s+(\w+)|import\s+(\w+))"
 
     for line in code.split("\n"):
         match = re.match(import_pattern, line.strip())
@@ -263,9 +254,37 @@ MODULE_TO_PACKAGE = {
 
 # Standard library modules to exclude
 STDLIB_MODULES = {
-    "os", "sys", "re", "json", "math", "time", "datetime", "collections",
-    "itertools", "functools", "typing", "dataclasses", "pathlib", "logging",
-    "asyncio", "abc", "enum", "hashlib", "base64", "urllib", "uuid",
-    "tempfile", "shutil", "io", "contextlib", "copy", "operator",
-    "secrets", "random", "string", "textwrap", "threading", "multiprocessing",
+    "os",
+    "sys",
+    "re",
+    "json",
+    "math",
+    "time",
+    "datetime",
+    "collections",
+    "itertools",
+    "functools",
+    "typing",
+    "dataclasses",
+    "pathlib",
+    "logging",
+    "asyncio",
+    "abc",
+    "enum",
+    "hashlib",
+    "base64",
+    "urllib",
+    "uuid",
+    "tempfile",
+    "shutil",
+    "io",
+    "contextlib",
+    "copy",
+    "operator",
+    "secrets",
+    "random",
+    "string",
+    "textwrap",
+    "threading",
+    "multiprocessing",
 }

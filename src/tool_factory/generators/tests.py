@@ -16,6 +16,7 @@ import json
 @dataclass
 class GeneratedTestCase:
     """A single test case."""
+
     name: str
     description: str
     tool_name: str
@@ -33,6 +34,7 @@ TestCase = GeneratedTestCase
 @dataclass
 class GeneratorConfig:
     """Configuration for test generation."""
+
     generate_existence_tests: bool = True
     generate_functional_tests: bool = True
     generate_error_tests: bool = True
@@ -160,7 +162,9 @@ class TestToolExistence:
         # Add assertions for each tool
         for spec in tool_specs:
             name = spec.get("name", "unknown")
-            code += f'        assert "{name}" in tool_names, "Tool {name} not registered"\n'
+            code += (
+                f'        assert "{name}" in tool_names, "Tool {name} not registered"\n'
+            )
 
         # Add individual tool tests
         for spec in tool_specs:
@@ -258,8 +262,7 @@ class TestToolBoundaries:
             properties = input_schema.get("properties", {})
 
             has_numbers = any(
-                p.get("type") in ("number", "integer")
-                for p in properties.values()
+                p.get("type") in ("number", "integer") for p in properties.values()
             )
 
             if has_numbers:
@@ -276,7 +279,7 @@ class TestToolBoundaries:
                     elif prop_schema.get("type") == "string":
                         code += f'        inputs["{prop_name}"] = "test"\n'
 
-                code += f'''
+                code += f"""
         try:
             result = await mcp_client.call_tool("{name}", inputs)
             # Should handle zeros gracefully
@@ -285,12 +288,9 @@ class TestToolBoundaries:
             # Some tools may reject zeros, which is acceptable
             pass
 
-'''
+"""
 
-            has_strings = any(
-                p.get("type") == "string"
-                for p in properties.values()
-            )
+            has_strings = any(p.get("type") == "string" for p in properties.values())
 
             if has_strings:
                 code += f'''
@@ -305,13 +305,13 @@ class TestToolBoundaries:
                     elif prop_schema.get("type") in ("number", "integer"):
                         code += f'        inputs["{prop_name}"] = 1\n'
 
-                code += f'''
+                code += f"""
         try:
             result = await mcp_client.call_tool("{name}", inputs)
         except Exception:
             pass  # Empty strings may be rejected
 
-'''
+"""
         return code
 
     def _generate_validation_tests(self, tool_specs: list[dict]) -> str:

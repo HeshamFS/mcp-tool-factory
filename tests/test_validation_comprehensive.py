@@ -156,21 +156,21 @@ class TestExtractJsonFromResponse:
 
     def test_extract_from_json_code_block(self):
         """Test extracting from ```json block."""
-        response = '''Here's the result:
+        response = """Here's the result:
 ```json
 {"name": "test", "value": 42}
 ```
-That's all.'''
+That's all."""
         result = extract_json_from_response(response)
         assert '"name": "test"' in result
         assert '"value": 42' in result
 
     def test_extract_from_plain_code_block(self):
         """Test extracting from plain ``` block."""
-        response = '''Result:
+        response = """Result:
 ```
 [{"tool": "test"}]
-```'''
+```"""
         result = extract_json_from_response(response)
         assert "[" in result
         assert '"tool": "test"' in result
@@ -261,9 +261,9 @@ class TestParseLLMToolResponse:
 
     def test_parse_with_markdown(self):
         """Test parsing response with markdown."""
-        response = '''```json
+        response = """```json
 [{"name": "test", "description": "Test tool"}]
-```'''
+```"""
         result = parse_llm_tool_response(response)
         assert len(result) == 1
 
@@ -311,33 +311,33 @@ class TestValidatePythonCode:
 
     def test_valid_code(self):
         """Test validating valid Python code."""
-        code = '''
+        code = """
 def hello():
     return "Hello, World!"
 
 class MyClass:
     pass
-'''
+"""
         is_valid, error = validate_python_code(code)
         assert is_valid is True
         assert error is None
 
     def test_invalid_syntax(self):
         """Test detecting invalid syntax."""
-        code = '''
+        code = """
 def broken(
     return "missing paren"
-'''
+"""
         is_valid, error = validate_python_code(code)
         assert is_valid is False
         assert "Syntax error" in error
 
     def test_indentation_error(self):
         """Test detecting indentation error."""
-        code = '''
+        code = """
 def test():
 print("wrong indent")
-'''
+"""
         is_valid, error = validate_python_code(code)
         assert is_valid is False
         assert error is not None

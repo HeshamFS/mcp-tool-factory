@@ -61,7 +61,7 @@ class TestGenerateServer:
         code = generator.generate_server(
             server_name="AuthServer",
             tool_specs=[basic_spec],
-            implementations={"test_tool": 'return {}'},
+            implementations={"test_tool": "return {}"},
             auth_env_vars=["API_KEY", "SECRET_TOKEN"],
         )
 
@@ -74,7 +74,7 @@ class TestGenerateServer:
         code = generator.generate_server(
             server_name="HealthServer",
             tool_specs=[basic_spec],
-            implementations={"test_tool": 'return {}'},
+            implementations={"test_tool": "return {}"},
             include_health_check=True,
         )
 
@@ -85,7 +85,7 @@ class TestGenerateServer:
         code = generator.generate_server(
             server_name="NoHealthServer",
             tool_specs=[basic_spec],
-            implementations={"test_tool": 'return {}'},
+            implementations={"test_tool": "return {}"},
             include_health_check=False,
         )
 
@@ -104,7 +104,7 @@ class TestGenerateServer:
         code = generator.generate_server(
             server_name="DepServer",
             tool_specs=[spec],
-            implementations={"http_tool": 'return {}'},
+            implementations={"http_tool": "return {}"},
         )
 
         assert "httpx" in code
@@ -122,7 +122,7 @@ class TestGenerateServer:
         code = generator.generate_server(
             server_name="ProdServer",
             tool_specs=[basic_spec],
-            implementations={"test_tool": '    return {}'},
+            implementations={"test_tool": "    return {}"},
             production_config=prod_config,
         )
 
@@ -153,9 +153,9 @@ class TestGenerateServer:
 
     def test_generate_server_with_import_extraction(self, generator, basic_spec):
         """Test that imports are extracted from implementations."""
-        impl_with_imports = '''import json
+        impl_with_imports = """import json
 import datetime
-return json.dumps({"time": str(datetime.datetime.now())})'''
+return json.dumps({"time": str(datetime.datetime.now())})"""
 
         code = generator.generate_server(
             server_name="ImportServer",
@@ -186,7 +186,7 @@ class TestGenerateServerSimple:
         code = generator.generate_server_simple(
             server_name="SimpleServer",
             tool_specs=[spec],
-            implementations={"simple_tool": '    return {}'},
+            implementations={"simple_tool": "    return {}"},
         )
 
         # Just verify it's valid server code
@@ -200,7 +200,7 @@ class TestGenerateServerSimple:
         code = generator.generate_server_simple(
             server_name="AuthServer",
             tool_specs=[spec],
-            implementations={"auth_tool": 'return {}'},
+            implementations={"auth_tool": "return {}"},
             auth_env_vars=["AUTH_KEY"],
         )
 
@@ -227,7 +227,9 @@ class TestGenerateDependencyImports:
 
     def test_multiple_deps(self, generator):
         """Test with multiple dependencies."""
-        imports = generator._generate_dependency_imports({"httpx", "aiohttp", "pydantic"})
+        imports = generator._generate_dependency_imports(
+            {"httpx", "aiohttp", "pydantic"}
+        )
         imports_str = "\n".join(imports)
         assert "httpx" in imports_str
         assert "aiohttp" in imports_str
@@ -252,26 +254,26 @@ class TestExtractImports:
 
     def test_simple_import(self, generator):
         """Test with simple import."""
-        code = '''import json
-return json.dumps({})'''
+        code = """import json
+return json.dumps({})"""
         imports, cleaned = generator._extract_imports_from_implementation(code)
         assert "import json" in imports
         assert "import json" not in cleaned
 
     def test_from_import(self, generator):
         """Test with from import."""
-        code = '''from datetime import datetime
-return str(datetime.now())'''
+        code = """from datetime import datetime
+return str(datetime.now())"""
         imports, cleaned = generator._extract_imports_from_implementation(code)
         assert "from datetime import datetime" in imports
         assert "from datetime" not in cleaned
 
     def test_multiple_imports(self, generator):
         """Test with multiple imports."""
-        code = '''import json
+        code = """import json
 import os
 from pathlib import Path
-return Path(os.getcwd())'''
+return Path(os.getcwd())"""
         imports, cleaned = generator._extract_imports_from_implementation(code)
         assert len(imports) == 3
         assert "import json" not in cleaned
@@ -288,22 +290,22 @@ class TestValidateGeneratedCode:
 
     def test_valid_code(self, generator):
         """Test with valid Python code."""
-        code = '''
+        code = """
 def hello():
     return "Hello"
 
 if __name__ == "__main__":
     print(hello())
-'''
+"""
         is_valid = generator._validate_generated_code(code)
         assert is_valid is True
 
     def test_invalid_syntax(self, generator):
         """Test with invalid syntax."""
-        code = '''
+        code = """
 def broken(
     return "missing paren"
-'''
+"""
         is_valid = generator._validate_generated_code(code)
         assert is_valid is False
 

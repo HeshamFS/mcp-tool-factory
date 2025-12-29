@@ -14,6 +14,7 @@ class TestAnthropicProvider:
     def test_provider_creation(self):
         """Test AnthropicProvider can be created."""
         from tool_factory.providers.anthropic import AnthropicProvider
+
         provider = AnthropicProvider(api_key="test-key", model="claude-3")
         assert provider.model == "claude-3"
         assert provider.api_key == "test-key"
@@ -74,6 +75,7 @@ class TestOpenAIProvider:
     def test_provider_creation(self):
         """Test OpenAIProvider can be created."""
         from tool_factory.providers.openai import OpenAIProvider
+
         provider = OpenAIProvider(api_key="test-key", model="gpt-4")
         assert provider.model == "gpt-4"
         assert provider.provider_name == "OpenAI"
@@ -113,6 +115,7 @@ class TestGoogleProvider:
     def test_provider_creation(self):
         """Test GoogleProvider can be created."""
         from tool_factory.providers.google import GoogleProvider
+
         provider = GoogleProvider(api_key="test-key", model="gemini-pro")
         assert provider.model == "gemini-pro"
         assert provider.provider_name == "Google"
@@ -144,6 +147,7 @@ class TestClaudeCodeProvider:
     def test_provider_creation(self):
         """Test ClaudeCodeProvider can be created."""
         from tool_factory.providers.claude_code import ClaudeCodeProvider
+
         provider = ClaudeCodeProvider(api_key="oauth-token", model="claude-3")
         assert provider.provider_name == "ClaudeCode"
 
@@ -171,6 +175,7 @@ class TestProviderFactory:
         )
 
         from tool_factory.providers.anthropic import AnthropicProvider
+
         assert isinstance(provider, AnthropicProvider)
 
     def test_create_openai_provider(self):
@@ -182,6 +187,7 @@ class TestProviderFactory:
         )
 
         from tool_factory.providers.openai import OpenAIProvider
+
         assert isinstance(provider, OpenAIProvider)
 
     def test_create_google_provider(self):
@@ -193,6 +199,7 @@ class TestProviderFactory:
         )
 
         from tool_factory.providers.google import GoogleProvider
+
         assert isinstance(provider, GoogleProvider)
 
     def test_create_claude_code_provider(self):
@@ -204,6 +211,7 @@ class TestProviderFactory:
         )
 
         from tool_factory.providers.claude_code import ClaudeCodeProvider
+
         assert isinstance(provider, ClaudeCodeProvider)
 
     def test_factory_with_temperature(self):
@@ -224,6 +232,7 @@ class TestBaseLLMProvider:
     def test_is_abstract(self):
         """Test that BaseLLMProvider is abstract."""
         from abc import ABC
+
         assert issubclass(BaseLLMProvider, ABC)
 
     def test_cannot_instantiate(self):
@@ -233,13 +242,13 @@ class TestBaseLLMProvider:
 
     def test_has_required_methods(self):
         """Test that BaseLLMProvider has required abstract methods."""
-        assert hasattr(BaseLLMProvider, '_initialize_client')
-        assert hasattr(BaseLLMProvider, '_call_api')
-        assert hasattr(BaseLLMProvider, 'call')
+        assert hasattr(BaseLLMProvider, "_initialize_client")
+        assert hasattr(BaseLLMProvider, "_call_api")
+        assert hasattr(BaseLLMProvider, "call")
 
     def test_provider_name_property(self):
         """Test provider_name property is required."""
-        assert hasattr(BaseLLMProvider, 'provider_name')
+        assert hasattr(BaseLLMProvider, "provider_name")
 
 
 class TestLLMResponse:

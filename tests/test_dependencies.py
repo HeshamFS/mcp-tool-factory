@@ -99,7 +99,9 @@ class TestKnownPackages:
             assert pkg.min_version != "0.1.0", f"{name} might have generic version"
             # Min version should have at least major.minor
             parts = pkg.min_version.split(".")
-            assert len(parts) >= 2, f"{name} version {pkg.min_version} should have major.minor"
+            assert (
+                len(parts) >= 2
+            ), f"{name} version {pkg.min_version} should have major.minor"
 
 
 class TestGetPackageVersion:
@@ -197,33 +199,33 @@ class TestDetectPackagesFromImports:
 
     def test_detect_simple_import(self):
         """Test detecting simple imports."""
-        code = '''
+        code = """
 import requests
 import httpx
-'''
+"""
         packages = detect_packages_from_imports(code)
         assert "requests" in packages
         assert "httpx" in packages
 
     def test_detect_from_import(self):
         """Test detecting from imports."""
-        code = '''
+        code = """
 from pydantic import BaseModel
 from httpx import AsyncClient
-'''
+"""
         packages = detect_packages_from_imports(code)
         assert "pydantic" in packages
         assert "httpx" in packages
 
     def test_excludes_stdlib(self):
         """Test standard library is excluded."""
-        code = '''
+        code = """
 import os
 import sys
 import json
 from typing import Any
 from dataclasses import dataclass
-'''
+"""
         packages = detect_packages_from_imports(code)
         assert "os" not in packages
         assert "sys" not in packages
@@ -232,11 +234,11 @@ from dataclasses import dataclass
 
     def test_maps_module_to_package(self):
         """Test module to package mapping."""
-        code = '''
+        code = """
 from PIL import Image
 import yaml
 from bs4 import BeautifulSoup
-'''
+"""
         packages = detect_packages_from_imports(code)
         assert "pillow" in packages
         assert "pyyaml" in packages
@@ -244,20 +246,20 @@ from bs4 import BeautifulSoup
 
     def test_returns_sorted(self):
         """Test packages are returned sorted."""
-        code = '''
+        code = """
 import requests
 import aiohttp
 import httpx
-'''
+"""
         packages = detect_packages_from_imports(code)
         assert packages == sorted(packages)
 
     def test_deduplicates(self):
         """Test duplicate imports are deduplicated."""
-        code = '''
+        code = """
 import httpx
 from httpx import AsyncClient
 import httpx
-'''
+"""
         packages = detect_packages_from_imports(code)
         assert packages.count("httpx") == 1

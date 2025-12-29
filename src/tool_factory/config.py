@@ -8,6 +8,7 @@ from typing import Any
 
 from dotenv import load_dotenv
 
+
 # Load .env file from current directory or parent directories
 def _load_env() -> None:
     """Load environment variables from .env file."""
@@ -18,7 +19,11 @@ def _load_env() -> None:
         return
 
     # Try to find .env in parent directories (up to 3 levels)
-    for parent in [Path.cwd().parent, Path.cwd().parent.parent, Path.cwd().parent.parent.parent]:
+    for parent in [
+        Path.cwd().parent,
+        Path.cwd().parent.parent,
+        Path.cwd().parent.parent.parent,
+    ]:
         env_path = parent / ".env"
         if env_path.exists():
             load_dotenv(env_path)
@@ -30,14 +35,18 @@ def _load_env() -> None:
     if env_path.exists():
         load_dotenv(env_path)
 
+
 # Load .env on module import
 _load_env()
 
 
 class LLMProvider(Enum):
     """Supported LLM providers."""
+
     ANTHROPIC = "anthropic"  # Direct API with ANTHROPIC_API_KEY
-    CLAUDE_CODE = "claude_code"  # Claude Agent SDK with OAuth token (for Max/Pro subscribers)
+    CLAUDE_CODE = (
+        "claude_code"  # Claude Agent SDK with OAuth token (for Max/Pro subscribers)
+    )
     OPENAI = "openai"
     GOOGLE = "google"
 
@@ -111,6 +120,7 @@ class FactoryConfig:
         max_tokens: Maximum tokens for generation
         temperature: Sampling temperature (0-1)
     """
+
     provider: LLMProvider = LLMProvider.ANTHROPIC
     model: str | None = None
     api_key: str | None = None
@@ -143,21 +153,33 @@ class FactoryConfig:
         errors = []
 
         if not self.api_key:
-            env_var = "ANTHROPIC_API_KEY" if self.provider == LLMProvider.ANTHROPIC else "OPENAI_API_KEY"
-            errors.append(f"API key not set. Set {env_var} environment variable or pass api_key parameter.")
+            env_var = (
+                "ANTHROPIC_API_KEY"
+                if self.provider == LLMProvider.ANTHROPIC
+                else "OPENAI_API_KEY"
+            )
+            errors.append(
+                f"API key not set. Set {env_var} environment variable or pass api_key parameter."
+            )
 
         if self.provider == LLMProvider.ANTHROPIC and self.model not in CLAUDE_MODELS:
-            errors.append(f"Unknown Claude model: {self.model}. Available: {list(CLAUDE_MODELS.keys())}")
+            errors.append(
+                f"Unknown Claude model: {self.model}. Available: {list(CLAUDE_MODELS.keys())}"
+            )
 
         # Claude Code SDK uses same models but doesn't require strict validation
         if self.provider == LLMProvider.CLAUDE_CODE:
             pass  # Claude Code SDK handles model validation internally
 
         if self.provider == LLMProvider.OPENAI and self.model not in OPENAI_MODELS:
-            errors.append(f"Unknown OpenAI model: {self.model}. Available: {list(OPENAI_MODELS.keys())}")
+            errors.append(
+                f"Unknown OpenAI model: {self.model}. Available: {list(OPENAI_MODELS.keys())}"
+            )
 
         if self.provider == LLMProvider.GOOGLE and self.model not in GOOGLE_MODELS:
-            errors.append(f"Unknown Google model: {self.model}. Available: {list(GOOGLE_MODELS.keys())}")
+            errors.append(
+                f"Unknown Google model: {self.model}. Available: {list(GOOGLE_MODELS.keys())}"
+            )
 
         return errors
 

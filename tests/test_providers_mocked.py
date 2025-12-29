@@ -255,6 +255,7 @@ class TestClaudeCodeProviderMocked:
 
     def test_call_success(self, provider):
         """Test successful Claude Code call."""
+
         # Mock the entire _async_query method
         async def mock_async_query(system_prompt, user_prompt):
             return "Claude Code response"
@@ -273,6 +274,7 @@ class TestClaudeCodeProviderMocked:
 
     def test_call_with_sdk_error(self, provider):
         """Test SDK error handling."""
+
         async def mock_async_query(system_prompt, user_prompt):
             raise RuntimeError("SDK not available")
 
@@ -303,7 +305,7 @@ class TestProviderInterface:
 
     def test_has_call_method(self, provider):
         """Test provider has call method."""
-        assert hasattr(provider, 'call')
+        assert hasattr(provider, "call")
         assert callable(provider.call)
 
     def test_inherits_from_base(self, provider):
@@ -312,12 +314,12 @@ class TestProviderInterface:
 
     def test_has_required_attributes(self, provider):
         """Test provider has required attributes."""
-        assert hasattr(provider, 'api_key')
-        assert hasattr(provider, 'model')
-        assert hasattr(provider, 'temperature')
+        assert hasattr(provider, "api_key")
+        assert hasattr(provider, "model")
+        assert hasattr(provider, "temperature")
 
     def test_provider_name_property(self, provider):
         """Test provider_name property."""
-        assert hasattr(provider, 'provider_name')
+        assert hasattr(provider, "provider_name")
         assert isinstance(provider.provider_name, str)
         assert len(provider.provider_name) > 0

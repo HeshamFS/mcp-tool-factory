@@ -78,6 +78,7 @@ class ServerGenerator:
 
         if production_config:
             from tool_factory.production import ProductionCodeGenerator
+
             prod_gen = ProductionCodeGenerator(production_config)
             prod_imports = prod_gen.generate_imports()
             prod_logging = prod_gen.generate_logging_code()
@@ -151,6 +152,7 @@ class ServerGenerator:
         # Add production imports if enabled
         if production_config:
             from tool_factory.production import ProductionCodeGenerator
+
             prod_gen = ProductionCodeGenerator(production_config)
             prod_imports = prod_gen.generate_imports()
             if prod_imports:
@@ -169,6 +171,7 @@ class ServerGenerator:
         # Add production utilities if enabled
         if production_config:
             from tool_factory.production import ProductionCodeGenerator
+
             prod_gen = ProductionCodeGenerator(production_config)
 
             # Add logging code
@@ -194,7 +197,9 @@ class ServerGenerator:
         # Add auth configuration section if needed
         if auth_env_vars:
             code_parts.append("# ============== AUTH CONFIGURATION ==============")
-            code_parts.append("# These environment variables are required for API access")
+            code_parts.append(
+                "# These environment variables are required for API access"
+            )
             code_parts.append("AUTH_CONFIG = {")
             for var in auth_env_vars:
                 code_parts.append(f'    "{var}": os.environ.get("{var}"),')
@@ -210,7 +215,9 @@ class ServerGenerator:
             code_parts.append('    """Get required auth value, raises if not set."""')
             code_parts.append("    value = get_auth(key)")
             code_parts.append("    if not value:")
-            code_parts.append(f'        raise ValueError(f"Missing required environment variable: {{key}}")')
+            code_parts.append(
+                f'        raise ValueError(f"Missing required environment variable: {{key}}")'
+            )
             code_parts.append("    return value")
             code_parts.append("")
             code_parts.append("")
@@ -225,7 +232,9 @@ class ServerGenerator:
             code_parts.append("    Check server health and configuration status.")
             code_parts.append("")
             code_parts.append("    Returns:")
-            code_parts.append("        Health status including uptime and auth configuration")
+            code_parts.append(
+                "        Health status including uptime and auth configuration"
+            )
             code_parts.append('    """')
             code_parts.append("    result = {")
             code_parts.append('        "status": "healthy",')
@@ -238,13 +247,17 @@ class ServerGenerator:
                 code_parts.append("    # Check auth configuration")
                 code_parts.append("    auth_status = {}")
                 for var in auth_env_vars:
-                    code_parts.append(f'    auth_status["{var}"] = "configured" if get_auth("{var}") else "MISSING"')
+                    code_parts.append(
+                        f'    auth_status["{var}"] = "configured" if get_auth("{var}") else "MISSING"'
+                    )
                 code_parts.append('    result["auth_config"] = auth_status')
                 code_parts.append("")
                 code_parts.append("    # Mark unhealthy if any auth is missing")
                 code_parts.append('    if "MISSING" in auth_status.values():')
                 code_parts.append('        result["status"] = "unhealthy"')
-                code_parts.append('        result["error"] = "Missing required authentication"')
+                code_parts.append(
+                    '        result["error"] = "Missing required authentication"'
+                )
             code_parts.append("")
             code_parts.append("    return result")
             code_parts.append("")
@@ -293,25 +306,33 @@ class ServerGenerator:
         code_parts.extend(tool_code_parts)
 
         # Add main block
-        code_parts.extend([
-            "",
-            "# ============== MAIN ==============",
-            "",
-            'if __name__ == "__main__":',
-        ])
+        code_parts.extend(
+            [
+                "",
+                "# ============== MAIN ==============",
+                "",
+                'if __name__ == "__main__":',
+            ]
+        )
 
         # Print auth warning if needed
         if auth_env_vars:
             code_parts.append("    # Check for required auth on startup")
-            code_parts.append("    missing_auth = [k for k, v in AUTH_CONFIG.items() if not v]")
+            code_parts.append(
+                "    missing_auth = [k for k, v in AUTH_CONFIG.items() if not v]"
+            )
             code_parts.append("    if missing_auth:")
-            code_parts.append("        print(f\"WARNING: Missing environment variables: {missing_auth}\")")
+            code_parts.append(
+                '        print(f"WARNING: Missing environment variables: {missing_auth}")'
+            )
             code_parts.append("")
 
-        code_parts.extend([
-            '    mcp.run(transport="stdio")',
-            "",
-        ])
+        code_parts.extend(
+            [
+                '    mcp.run(transport="stdio")',
+                "",
+            ]
+        )
 
         final_code = "\n".join(code_parts)
 
@@ -365,17 +386,19 @@ class ServerGenerator:
 
         # Add basic test for each tool
         for spec in tool_specs:
-            test_parts.extend([
-                "",
-                "@pytest.mark.asyncio",
-                f"async def test_{spec.name}_exists(mcp_client):",
-                f'    """Test {spec.name} tool is callable."""',
-                "    tools = await mcp_client.list_tools()",
-                f'    tool = next((t for t in tools.tools if t.name == "{spec.name}"), None)',
-                "    assert tool is not None",
-                f'    assert tool.description == "{spec.description}"',
-                "",
-            ])
+            test_parts.extend(
+                [
+                    "",
+                    "@pytest.mark.asyncio",
+                    f"async def test_{spec.name}_exists(mcp_client):",
+                    f'    """Test {spec.name} tool is callable."""',
+                    "    tools = await mcp_client.list_tools()",
+                    f'    tool = next((t for t in tools.tools if t.name == "{spec.name}"), None)',
+                    "    assert tool is not None",
+                    f'    assert tool.description == "{spec.description}"',
+                    "",
+                ]
+            )
 
         return "\n".join(test_parts)
 
@@ -404,17 +427,17 @@ class ServerGenerator:
 
         # Add production dependencies if enabled
         if production_config:
-            if getattr(production_config, 'enable_metrics', False):
+            if getattr(production_config, "enable_metrics", False):
                 all_deps.add("prometheus_client")
-            if getattr(production_config, 'enable_rate_limiting', False):
+            if getattr(production_config, "enable_rate_limiting", False):
                 # Rate limiter is custom, but might use redis in future
                 pass
-            if getattr(production_config, 'enable_retries', False):
+            if getattr(production_config, "enable_retries", False):
                 all_deps.add("tenacity")
 
         deps_str = " ".join(sorted(all_deps))
 
-        dockerfile = f'''FROM python:3.11-slim
+        dockerfile = f"""FROM python:3.11-slim
 
 WORKDIR /app
 
@@ -423,7 +446,7 @@ RUN pip install --no-cache-dir {deps_str}
 
 # Copy server code
 COPY server.py .
-'''
+"""
 
         # Add environment variables for auth
         if auth_env_vars:
@@ -434,13 +457,13 @@ COPY server.py .
             dockerfile += "\n"
 
         # Add proper health check that actually tests the server
-        dockerfile += '''# Health check - verifies server module loads correctly
+        dockerfile += """# Health check - verifies server module loads correctly
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \\
     CMD python -c "import server; print('OK')"
 
 # Run the server
 CMD ["python", "server.py"]
-'''
+"""
         return dockerfile
 
     def generate_pyproject(self, server_name: str, tool_specs: list[ToolSpec]) -> str:
@@ -453,7 +476,7 @@ CMD ["python", "server.py"]
 
         deps_list = ",\n    ".join(f'"{dep}"' for dep in sorted(all_deps))
 
-        return f'''[build-system]
+        return f"""[build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
@@ -471,7 +494,7 @@ dev = [
     "pytest>=8.0.0",
     "pytest-asyncio>=0.24.0",
 ]
-'''
+"""
 
     def _generate_dependency_imports(self, deps: set[str]) -> list[str]:
         """Generate import statements for dependencies."""
@@ -600,7 +623,7 @@ dev = [
             for var in auth_env_vars:
                 env_section += f"          {var}: ${{{{ secrets.{var} }}}}\n"
 
-        return f'''name: CI/CD - {server_name}
+        return f"""name: CI/CD - {server_name}
 
 on:
   push:
@@ -693,4 +716,4 @@ jobs:
   #         context: .
   #         push: true
   #         tags: ghcr.io/${{{{ github.repository_owner }}}}/{server_name.lower().replace(" ", "-")}:latest
-'''
+"""

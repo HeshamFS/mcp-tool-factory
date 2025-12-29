@@ -16,18 +16,22 @@ def sample_spec():
             "type": "object",
             "properties": {
                 "city": {"type": "string", "description": "City name"},
-                "unit": {"type": "string", "description": "Temperature unit", "default": "celsius"}
+                "unit": {
+                    "type": "string",
+                    "description": "Temperature unit",
+                    "default": "celsius",
+                },
             },
-            "required": ["city"]
+            "required": ["city"],
         },
         output_schema={
             "type": "object",
             "properties": {
                 "temperature": {"type": "number"},
-                "conditions": {"type": "string"}
-            }
+                "conditions": {"type": "string"},
+            },
         },
-        dependencies=["requests"]
+        dependencies=["requests"],
     )
 
 
@@ -45,7 +49,7 @@ class TestServerGenerator:
                 "get_weather": '''def get_weather(city: str, unit: str = "celsius") -> dict:
     """Get weather for a city."""
     return {"temperature": 22, "conditions": "sunny"}'''
-            }
+            },
         )
 
         assert "FastMCP" in code
@@ -100,7 +104,7 @@ class TestServerGenerator:
         dockerfile = generator.generate_dockerfile([sample_spec])
 
         # Should import server module, not just exit(0)
-        assert 'import server' in dockerfile
+        assert "import server" in dockerfile
 
     def test_generate_pyproject(self, sample_spec):
         """Test pyproject.toml generation."""
@@ -111,7 +115,6 @@ class TestServerGenerator:
         assert "[project]" in pyproject
         assert "testserver" in pyproject  # Name is lowercased
         assert "mcp>=1.0.0" in pyproject
-
 
     def test_extract_imports_from_implementation(self, sample_spec):
         """Test that imports are extracted from implementation code."""
@@ -124,7 +127,9 @@ def roll_dice(sides: int = 6) -> dict:
     """Roll a dice."""
     return {"result": random.randint(1, sides)}'''
 
-        imports, cleaned = generator._extract_imports_from_implementation(impl_with_imports)
+        imports, cleaned = generator._extract_imports_from_implementation(
+            impl_with_imports
+        )
 
         assert len(imports) == 2
         assert "import random" in imports
@@ -147,7 +152,7 @@ def get_weather(city: str, unit: str = "celsius") -> dict:
         code = generator.generate_server_simple(
             server_name="WeatherServer",
             tool_specs=[sample_spec],
-            implementations={"get_weather": impl_with_import}
+            implementations={"get_weather": impl_with_import},
         )
 
         # Should compile without syntax errors
@@ -216,8 +221,8 @@ def get_weather(city: str, unit: str = "celsius") -> dict:
 
         generator = ServerGenerator()
 
-        impl = '''def get_weather(city: str) -> dict:
-    return {"temp": 20}'''
+        impl = """def get_weather(city: str) -> dict:
+    return {"temp": 20}"""
 
         config = ProductionConfig(
             enable_logging=True,

@@ -22,6 +22,7 @@ from .config import LLMProvider
 @dataclass
 class SearchResult:
     """Result from a web search - FULL DATA."""
+
     query: str
     content: str  # Full content - no truncation
     sources: list[dict[str, Any]] = field(default_factory=list)  # Full source data
@@ -61,15 +62,19 @@ class WebSearcher:
             "model": self.model or "claude-sonnet-4-5-20241022",
             "max_tokens": 4096,
             "betas": ["web-search-2025-03-05"],
-            "tools": [{
-                "type": "web_search_20250305",
-                "name": "web_search",
-                "max_uses": max_results,
-            }],
-            "messages": [{
-                "role": "user",
-                "content": f"Search the web for: {query}\n\nProvide a comprehensive summary of the most relevant information found."
-            }],
+            "tools": [
+                {
+                    "type": "web_search_20250305",
+                    "name": "web_search",
+                    "max_uses": max_results,
+                }
+            ],
+            "messages": [
+                {
+                    "role": "user",
+                    "content": f"Search the web for: {query}\n\nProvide a comprehensive summary of the most relevant information found.",
+                }
+            ],
         }
 
         response = client.messages.create(
@@ -109,15 +114,21 @@ class WebSearcher:
 
         # Build full response object
         api_response = {
-            "id": response.id if hasattr(response, 'id') else None,
-            "type": response.type if hasattr(response, 'type') else None,
-            "role": response.role if hasattr(response, 'role') else None,
-            "model": response.model if hasattr(response, 'model') else None,
-            "stop_reason": response.stop_reason if hasattr(response, 'stop_reason') else None,
+            "id": response.id if hasattr(response, "id") else None,
+            "type": response.type if hasattr(response, "type") else None,
+            "role": response.role if hasattr(response, "role") else None,
+            "model": response.model if hasattr(response, "model") else None,
+            "stop_reason": (
+                response.stop_reason if hasattr(response, "stop_reason") else None
+            ),
             "content": raw_content_blocks,
             "usage": {
-                "input_tokens": response.usage.input_tokens if hasattr(response, 'usage') else None,
-                "output_tokens": response.usage.output_tokens if hasattr(response, 'usage') else None,
+                "input_tokens": (
+                    response.usage.input_tokens if hasattr(response, "usage") else None
+                ),
+                "output_tokens": (
+                    response.usage.output_tokens if hasattr(response, "usage") else None
+                ),
             },
         }
 
@@ -150,8 +161,7 @@ class WebSearcher:
             raw_messages = []
 
             async for message in sdk_query(
-                prompt=api_request["prompt"],
-                options=options
+                prompt=api_request["prompt"], options=options
             ):
                 # Capture raw message
                 msg_data = {"type": type(message).__name__}
@@ -162,7 +172,9 @@ class WebSearcher:
                         for block in message.content:
                             if hasattr(block, "text"):
                                 result += block.text
-                                msg_data["content"].append({"type": "text", "text": block.text})
+                                msg_data["content"].append(
+                                    {"type": "text", "text": block.text}
+                                )
                     elif isinstance(message.content, str):
                         result += message.content
                         msg_data["content"] = message.content
@@ -189,10 +201,12 @@ class WebSearcher:
 
         api_request = {
             "model": self.model or "gpt-4o-search-preview",
-            "tools": [{
-                "type": "web_search",
-                "search_context_size": "medium",
-            }],
+            "tools": [
+                {
+                    "type": "web_search",
+                    "search_context_size": "medium",
+                }
+            ],
             "input": f"Search the web for: {query}\n\nProvide a comprehensive summary.",
         }
 
@@ -202,7 +216,9 @@ class WebSearcher:
             input=api_request["input"],
         )
 
-        content = response.output_text if hasattr(response, "output_text") else str(response)
+        content = (
+            response.output_text if hasattr(response, "output_text") else str(response)
+        )
         sources = []
 
         # Extract FULL citations
@@ -223,7 +239,7 @@ class WebSearcher:
             "citations": sources,
         }
         # Add any other response attributes
-        for attr in ['id', 'model', 'created', 'status']:
+        for attr in ["id", "model", "created", "status"]:
             if hasattr(response, attr):
                 api_response[attr] = getattr(response, attr)
 
@@ -256,26 +272,51 @@ class WebSearcher:
 
         content = response.text if hasattr(response, "text") else str(response)
         sources = []
+        api_response_grounding = None
 
-        # Extract FULL grounding sources
-        if hasattr(response, "grounding_metadata"):
-            grounding = response.grounding_metadata
-            if isinstance(grounding, dict):
-                for source in grounding.get("grounding_sources", []):
-                    sources.append(source)  # Full source data
-            api_response_grounding = grounding
-        else:
-            api_response_grounding = None
+        # Extract grounding metadata from candidates (per Google API docs)
+        # See: https://ai.google.dev/gemini-api/docs/google-search
+        if hasattr(response, "candidates") and response.candidates:
+            candidate = response.candidates[0]
+            if hasattr(candidate, "grounding_metadata"):
+                grounding = candidate.grounding_metadata
+                api_response_grounding = {}
+
+                # Extract grounding_chunks (web sources with URI and title)
+                if hasattr(grounding, "grounding_chunks"):
+                    for chunk in grounding.grounding_chunks:
+                        if hasattr(chunk, "web"):
+                            source_data = {}
+                            if hasattr(chunk.web, "uri"):
+                                source_data["url"] = chunk.web.uri
+                            if hasattr(chunk.web, "title"):
+                                source_data["title"] = chunk.web.title
+                            sources.append(source_data)
+                    api_response_grounding["grounding_chunks"] = str(
+                        grounding.grounding_chunks
+                    )
+
+                # Extract search queries used
+                if hasattr(grounding, "web_search_queries"):
+                    api_response_grounding["web_search_queries"] = list(
+                        grounding.web_search_queries
+                    )
+
+                # Extract grounding supports (citations)
+                if hasattr(grounding, "grounding_supports"):
+                    api_response_grounding["grounding_supports"] = str(
+                        grounding.grounding_supports
+                    )
 
         # Build full response object
         api_response = {
             "text": content,
             "grounding_metadata": api_response_grounding,
         }
-        # Add candidates if available
+        # Add candidates info if available
         if hasattr(response, "candidates"):
             try:
-                api_response["candidates"] = str(response.candidates)
+                api_response["candidates_count"] = len(response.candidates)
             except Exception:
                 pass
 

@@ -57,12 +57,13 @@ class TestBaseLLMProvider:
 
     def test_abstract_methods(self):
         """Test that BaseLLMProvider has abstract methods."""
-        assert hasattr(BaseLLMProvider, 'call')
-        assert hasattr(BaseLLMProvider, 'provider_name')
+        assert hasattr(BaseLLMProvider, "call")
+        assert hasattr(BaseLLMProvider, "provider_name")
 
     def test_is_abstract(self):
         """Test that BaseLLMProvider is abstract."""
         from abc import ABC
+
         assert issubclass(BaseLLMProvider, ABC)
 
     def test_cannot_instantiate(self):
@@ -77,6 +78,7 @@ class TestClaudeCodeProvider:
     def test_provider_creation(self):
         """Test Claude Code provider can be created."""
         from tool_factory.providers.claude_code import ClaudeCodeProvider
+
         provider = ClaudeCodeProvider(api_key="token", model="claude-3")
         assert provider.model == "claude-3"
         assert provider.provider_name == "ClaudeCode"
@@ -84,6 +86,7 @@ class TestClaudeCodeProvider:
     def test_call_returns_llm_response(self):
         """Test call returns LLMResponse."""
         from tool_factory.providers.claude_code import ClaudeCodeProvider
+
         provider = ClaudeCodeProvider(api_key="token", model="claude-3")
         provider._client = True
 
@@ -105,9 +108,11 @@ class TestProviderFactoryImport:
     def test_factory_import(self):
         """Test that factory can be imported."""
         from tool_factory.providers.factory import create_provider
+
         assert callable(create_provider)
 
     def test_factory_has_provider_mapping(self):
         """Test that factory has provider type handling."""
         from tool_factory.providers import factory
-        assert hasattr(factory, 'create_provider')
+
+        assert hasattr(factory, "create_provider")

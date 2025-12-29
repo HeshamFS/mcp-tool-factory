@@ -95,7 +95,9 @@ class TestGenerationLog:
         log = GenerationLog(server_name="Test")
 
         log.add_step("init", "Initializing")
-        log.add_step("generate", "Generating code", input_data="specs", output_data="code")
+        log.add_step(
+            "generate", "Generating code", input_data="specs", output_data="code"
+        )
 
         assert len(log.steps) == 2
         assert log.steps[0].step_name == "init"
@@ -107,7 +109,9 @@ class TestGenerationLog:
         log = GenerationLog(server_name="Test")
 
         log.add_web_search("weather API", "Found results...")
-        log.add_web_search("API docs", "Documentation...", sources=["https://example.com"])
+        log.add_web_search(
+            "API docs", "Documentation...", sources=["https://example.com"]
+        )
 
         assert len(log.web_searches) == 2
         assert log.web_searches[0].query == "weather API"

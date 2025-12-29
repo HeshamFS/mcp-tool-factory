@@ -12,7 +12,11 @@ from pathlib import Path
 
 import pytest
 
-from tool_factory.database import DatabaseType, DatabaseIntrospector, DatabaseServerGenerator
+from tool_factory.database import (
+    DatabaseType,
+    DatabaseIntrospector,
+    DatabaseServerGenerator,
+)
 from tool_factory.openapi import OpenAPIParser, OpenAPIServerGenerator
 from tool_factory.generators.server import ServerGenerator
 from tool_factory.production import ProductionConfig
@@ -32,16 +36,19 @@ class TestDatabaseIntegrationWorkflow:
         cursor = conn.cursor()
 
         # Create a realistic schema
-        cursor.execute("""
+        cursor.execute(
+            """
             CREATE TABLE users (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 username TEXT NOT NULL UNIQUE,
                 email TEXT NOT NULL,
                 created_at TEXT DEFAULT CURRENT_TIMESTAMP
             )
-        """)
+        """
+        )
 
-        cursor.execute("""
+        cursor.execute(
+            """
             CREATE TABLE posts (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 user_id INTEGER NOT NULL,
@@ -50,9 +57,11 @@ class TestDatabaseIntegrationWorkflow:
                 published BOOLEAN DEFAULT 0,
                 FOREIGN KEY (user_id) REFERENCES users(id)
             )
-        """)
+        """
+        )
 
-        cursor.execute("""
+        cursor.execute(
+            """
             CREATE TABLE comments (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 post_id INTEGER NOT NULL,
@@ -61,7 +70,8 @@ class TestDatabaseIntegrationWorkflow:
                 FOREIGN KEY (post_id) REFERENCES posts(id),
                 FOREIGN KEY (user_id) REFERENCES users(id)
             )
-        """)
+        """
+        )
 
         # Insert sample data
         cursor.execute(
@@ -113,9 +123,21 @@ class TestDatabaseIntegrationWorkflow:
 
         # Check all expected tools are generated
         expected_tools = [
-            "get_users", "list_users", "create_users", "update_users", "delete_users",
-            "get_posts", "list_posts", "create_posts", "update_posts", "delete_posts",
-            "get_comments", "list_comments", "create_comments", "update_comments", "delete_comments",
+            "get_users",
+            "list_users",
+            "create_users",
+            "update_users",
+            "delete_users",
+            "get_posts",
+            "list_posts",
+            "create_posts",
+            "update_posts",
+            "delete_posts",
+            "get_comments",
+            "list_comments",
+            "create_comments",
+            "update_comments",
+            "delete_comments",
         ]
         for tool in expected_tools:
             assert tool in code, f"Missing tool: {tool}"
@@ -158,9 +180,7 @@ class TestOpenAPIIntegrationWorkflow:
                 "description": "A sample Pet Store API",
                 "version": "1.0.0",
             },
-            "servers": [
-                {"url": "https://api.petstore.example.com/v1"}
-            ],
+            "servers": [{"url": "https://api.petstore.example.com/v1"}],
             "components": {
                 "securitySchemes": {
                     "apiKey": {
@@ -418,8 +438,8 @@ class TestProductionFeaturesIntegration:
             server_name="FullServer",
             tool_specs=[sample_spec],
             implementations={
-                "calculate": '''def calculate(a: float, b: float) -> dict:
-    return {"result": a + b}'''
+                "calculate": """def calculate(a: float, b: float) -> dict:
+    return {"result": a + b}"""
             },
             production_config=config,
         )
@@ -490,13 +510,15 @@ class TestEndToEndWorkflow:
         db_path = os.path.join(temp_output_dir, "test.db")
         conn = sqlite3.connect(db_path)
         cursor = conn.cursor()
-        cursor.execute("""
+        cursor.execute(
+            """
             CREATE TABLE items (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL,
                 quantity INTEGER DEFAULT 0
             )
-        """)
+        """
+        )
         conn.commit()
         conn.close()
 

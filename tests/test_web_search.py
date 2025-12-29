@@ -209,10 +209,13 @@ class TestWebSearcher:
         """Test Google web search."""
         import sys
 
+        # Create mock candidate without grounding metadata
+        mock_candidate = Mock()
+        mock_candidate.grounding_metadata = None
+
         mock_response = Mock()
         mock_response.text = "Google search result"
-        mock_response.grounding_metadata = None
-        mock_response.candidates = []
+        mock_response.candidates = [mock_candidate]
 
         mock_model = Mock()
         mock_model.generate_content.return_value = mock_response
@@ -220,7 +223,13 @@ class TestWebSearcher:
         mock_genai = Mock()
         mock_genai.GenerativeModel.return_value = mock_model
 
-        with patch.dict(sys.modules, {"google.generativeai": mock_genai}):
+        # Must mock both parent 'google' module and 'google.generativeai'
+        mock_google = Mock()
+        mock_google.generativeai = mock_genai
+
+        with patch.dict(
+            sys.modules, {"google": mock_google, "google.generativeai": mock_genai}
+        ):
             searcher = WebSearcher(
                 provider=LLMProvider.GOOGLE,
                 api_key="test-key",
@@ -235,13 +244,25 @@ class TestWebSearcher:
         """Test Google search with grounding metadata."""
         import sys
 
+        # Create mock grounding chunk with web source (per Google API docs)
+        mock_web = Mock()
+        mock_web.uri = "https://google.com"
+        mock_web.title = "Google"
+
+        mock_chunk = Mock()
+        mock_chunk.web = mock_web
+
+        mock_grounding = Mock()
+        mock_grounding.grounding_chunks = [mock_chunk]
+        mock_grounding.web_search_queries = ["test query"]
+        mock_grounding.grounding_supports = []
+
+        mock_candidate = Mock()
+        mock_candidate.grounding_metadata = mock_grounding
+
         mock_response = Mock()
         mock_response.text = "Grounded result"
-        mock_response.grounding_metadata = {
-            "grounding_sources": [
-                {"url": "https://google.com", "title": "Google"}
-            ]
-        }
+        mock_response.candidates = [mock_candidate]
 
         mock_model = Mock()
         mock_model.generate_content.return_value = mock_response
@@ -249,7 +270,13 @@ class TestWebSearcher:
         mock_genai = Mock()
         mock_genai.GenerativeModel.return_value = mock_model
 
-        with patch.dict(sys.modules, {"google.generativeai": mock_genai}):
+        # Must mock both parent 'google' module and 'google.generativeai'
+        mock_google = Mock()
+        mock_google.generativeai = mock_genai
+
+        with patch.dict(
+            sys.modules, {"google": mock_google, "google.generativeai": mock_genai}
+        ):
             searcher = WebSearcher(
                 provider=LLMProvider.GOOGLE,
                 api_key="test-key",
@@ -258,6 +285,7 @@ class TestWebSearcher:
 
             assert len(result.sources) == 1
             assert result.sources[0]["url"] == "https://google.com"
+            assert result.sources[0]["title"] == "Google"
 
     def test_search_claude_code(self):
         """Test Claude Code web search."""
@@ -466,7 +494,9 @@ class TestGenerateSearchQueries:
 
     def test_finance_query(self):
         """Test finance keyword generates stock query."""
-        queries = _generate_search_queries("Finance data service")  # Use "finance" not "financial"
+        queries = _generate_search_queries(
+            "Finance data service"
+        )  # Use "finance" not "financial"
         assert any("stock" in q.lower() or "finance" in q.lower() for q in queries)
 
     def test_geocoding_query(self):

@@ -43,8 +43,16 @@ class GoogleProvider(BaseLLMProvider):
         try:
             raw_response = {
                 "text": text,
-                "candidates": str(response.candidates) if hasattr(response, 'candidates') else None,
-                "prompt_feedback": str(response.prompt_feedback) if hasattr(response, 'prompt_feedback') else None,
+                "candidates": (
+                    str(response.candidates)
+                    if hasattr(response, "candidates")
+                    else None
+                ),
+                "prompt_feedback": (
+                    str(response.prompt_feedback)
+                    if hasattr(response, "prompt_feedback")
+                    else None
+                ),
             }
         except Exception as e:
             logger.debug(f"Failed to capture response object: {e}")

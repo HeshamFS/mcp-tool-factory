@@ -179,7 +179,10 @@ class TestAuthErrorHandling:
 
     def test_pkce_challenge_generation(self):
         """Test PKCE challenge generation."""
-        from tool_factory.auth.pkce import generate_code_verifier, generate_code_challenge
+        from tool_factory.auth.pkce import (
+            generate_code_verifier,
+            generate_code_challenge,
+        )
 
         verifier = generate_code_verifier()
         challenge = generate_code_challenge(verifier)
