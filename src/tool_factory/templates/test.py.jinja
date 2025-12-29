@@ -1,0 +1,36 @@
+"""Auto-generated tests for {{ server_name }}."""
+
+import json
+import pytest
+from mcp import Client
+
+
+@pytest.fixture
+async def mcp_client():
+    """Create MCP client connected to server."""
+    from server import mcp
+
+    async with Client(transport=mcp) as client:
+        yield client
+
+
+@pytest.mark.asyncio
+async def test_list_tools(mcp_client):
+    """Verify all tools are registered."""
+    tools = await mcp_client.list_tools()
+    tool_names = [t.name for t in tools.tools]
+
+{% for spec in tool_specs %}
+    assert "{{ spec.name }}" in tool_names
+{% endfor %}
+
+{% for spec in tool_specs %}
+
+@pytest.mark.asyncio
+async def test_{{ spec.name }}_exists(mcp_client):
+    """Test {{ spec.name }} tool is callable."""
+    tools = await mcp_client.list_tools()
+    tool = next((t for t in tools.tools if t.name == "{{ spec.name }}"), None)
+    assert tool is not None
+    assert "{{ spec.description[:50] }}" in tool.description
+{% endfor %}

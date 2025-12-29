@@ -1,0 +1,117 @@
+"""Auto-generated MCP server: {{ server_name }}"""
+
+import os
+from datetime import datetime
+from mcp.server.fastmcp import FastMCP
+from typing import Any
+{% for import in dependency_imports %}
+{{ import }}
+{% endfor %}
+{% if extracted_imports %}
+{% for import in extracted_imports %}
+{{ import }}
+{% endfor %}
+{% endif %}
+{% if production_imports %}
+{{ production_imports }}
+{% endif %}
+
+mcp = FastMCP("{{ server_name }}", json_response=True)
+
+{% if production_logging %}
+# ============== STRUCTURED LOGGING ==============
+{{ production_logging }}
+
+{% endif %}
+{% if production_metrics %}
+# ============== PROMETHEUS METRICS ==============
+{{ production_metrics }}
+
+{% endif %}
+{% if production_rate_limiting %}
+# ============== RATE LIMITING ==============
+{{ production_rate_limiting }}
+
+{% endif %}
+{% if production_retry %}
+# ============== RETRY LOGIC ==============
+{{ production_retry }}
+
+{% endif %}
+{% if auth_env_vars %}
+# ============== AUTH CONFIGURATION ==============
+# These environment variables are required for API access
+AUTH_CONFIG = {
+{% for var in auth_env_vars %}
+    "{{ var }}": os.environ.get("{{ var }}"),
+{% endfor %}
+}
+
+
+def get_auth(key: str) -> str | None:
+    """Get authentication value from environment."""
+    return AUTH_CONFIG.get(key)
+
+
+def require_auth(key: str) -> str:
+    """Get required auth value, raises if not set."""
+    value = get_auth(key)
+    if not value:
+        raise ValueError(f"Missing required environment variable: {key}")
+    return value
+
+{% endif %}
+{% if include_health_check %}
+# ============== HEALTH CHECK ==============
+
+@mcp.tool()
+def health_check() -> dict:
+    """
+    Check server health and configuration status.
+
+    Returns:
+        Health status including uptime and auth configuration
+    """
+    result = {
+        "status": "healthy",
+        "server": "{{ server_name }}",
+        "timestamp": datetime.now().isoformat(),
+        "tools_available": {{ tool_count }},
+    }
+{% if auth_env_vars %}
+
+    # Check auth configuration
+    auth_status = {}
+{% for var in auth_env_vars %}
+    auth_status["{{ var }}"] = "configured" if get_auth("{{ var }}") else "MISSING"
+{% endfor %}
+    result["auth_config"] = auth_status
+
+    # Mark unhealthy if any auth is missing
+    if "MISSING" in auth_status.values():
+        result["status"] = "unhealthy"
+        result["error"] = "Missing required authentication"
+{% endif %}
+
+    return result
+
+{% endif %}
+# ============== TOOLS ==============
+
+{% for spec in tool_specs %}
+@mcp.tool()
+{{ implementations[spec.name] }}
+
+{% endfor %}
+
+# ============== MAIN ==============
+
+if __name__ == "__main__":
+{% if auth_env_vars %}
+    # Check for required auth on startup
+    missing_auth = [k for k, v in AUTH_CONFIG.items() if not v]
+    if missing_auth:
+        print(f"WARNING: Missing environment variables: {missing_auth}")
+
+{% endif %}
+    mcp.run(transport="stdio")

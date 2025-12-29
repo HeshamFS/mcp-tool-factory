@@ -1,0 +1,20 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "dittomcp"
+version = "0.1.0"
+description = "Auto-generated MCP server"
+requires-python = ">=3.11"
+dependencies = [
+    "mcp>=1.0.0",
+    "requests>=0.1.0",
+    "websocket-client>=0.1.0"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.24.0",
+]

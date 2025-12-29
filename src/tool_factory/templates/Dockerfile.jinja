@@ -1,0 +1,24 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install dependencies
+RUN pip install --no-cache-dir {{ dependencies }}
+
+# Copy server code
+COPY server.py .
+{% if auth_env_vars %}
+
+# Required environment variables for API access
+# Pass these when running: docker run -e VAR=value ...
+{% for var in auth_env_vars %}
+ENV {{ var }}=
+{% endfor %}
+{% endif %}
+
+# Health check - verifies server module loads correctly
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD python -c "import server; print('OK')"
+
+# Run the server
+CMD ["python", "server.py"]
