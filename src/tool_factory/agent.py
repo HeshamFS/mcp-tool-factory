@@ -64,6 +64,7 @@ class ToolFactoryAgent:
         config: FactoryConfig | None = None,
         api_key: str | None = None,
         model: str | None = None,
+        require_llm: bool = True,
     ) -> None:
         """
         Initialize the Tool Factory Agent.
@@ -72,6 +73,7 @@ class ToolFactoryAgent:
             config: Full configuration object. If provided, api_key and model are ignored.
             api_key: Anthropic API key. If None, uses ANTHROPIC_API_KEY env var.
             model: Model to use. Defaults to claude-sonnet-4-20250514.
+            require_llm: If False, skip LLM validation (for OpenAPI/database generation).
 
         Raises:
             ValueError: If API key is not set and not found in environment.
@@ -86,22 +88,25 @@ class ToolFactoryAgent:
             if model:
                 self.config.model = model
 
-        # Validate config
-        errors = self.config.validate()
-        if errors:
-            raise ValueError(
-                "Configuration errors:\n" + "\n".join(f"  - {e}" for e in errors)
-            )
+        # Validate config (skip API key check if LLM not required)
+        if require_llm:
+            errors = self.config.validate()
+            if errors:
+                raise ValueError(
+                    "Configuration errors:\n" + "\n".join(f"  - {e}" for e in errors)
+                )
 
         # Initialize LLM provider using the new provider system
-        from tool_factory.providers import create_provider
+        self.provider = None
+        if require_llm:
+            from tool_factory.providers import create_provider
 
-        self.provider = create_provider(
-            provider=self.config.provider,
-            api_key=self.config.api_key,
-            model=self.config.model,
-            temperature=self.config.temperature,
-        )
+            self.provider = create_provider(
+                provider=self.config.provider,
+                api_key=self.config.api_key,
+                model=self.config.model,
+                temperature=self.config.temperature,
+            )
 
         self.server_generator = ServerGenerator()
         self.docs_generator = DocsGenerator()

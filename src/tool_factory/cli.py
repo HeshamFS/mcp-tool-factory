@@ -370,7 +370,8 @@ def from_openapi(
     ) as progress:
         task = progress.add_task("Parsing OpenAPI specification...", total=None)
 
-        agent = ToolFactoryAgent()
+        # OpenAPI generation doesn't need LLM - it's deterministic
+        agent = ToolFactoryAgent(require_llm=False)
 
         progress.update(task, description="Generating MCP server code...")
         import asyncio
